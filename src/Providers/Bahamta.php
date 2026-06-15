@@ -2,6 +2,8 @@
 
 namespace MbpCoder\Payment\Providers;
 
+use MbpCoder\Payment\Support\Redirect;
+use MbpCoder\Payment\Config\Config;
 use MbpCoder\Payment\IPaymentChannel;
 use MbpCoder\Payment\Models\PaymentResponse;
 use MbpCoder\Payment\Models\PaymentStatus;
@@ -18,9 +20,9 @@ class Bahamta extends Base implements IPaymentChannel
     {
         parent::__construct();
 
-        $this->token = \MbpCoder\Payment\Config\Config::get('channels.ipg.provider.bahamta.token');
-        $this->sendUrl = \MbpCoder\Payment\Config\Config::get('channels.ipg.provider.bahamta.send_url');
-        $this->verifyUrl = \MbpCoder\Payment\Config\Config::get('channels.ipg.provider.bahamta.verify_url');
+        $this->token = Config::get('channels.ipg.provider.bahamta.token');
+        $this->sendUrl = Config::get('channels.ipg.provider.bahamta.send_url');
+        $this->verifyUrl = Config::get('channels.ipg.provider.bahamta.verify_url');
 
         $this->name = "bahamta";
 
@@ -52,7 +54,7 @@ class Bahamta extends Base implements IPaymentChannel
 
     public function pay(string|int $paymentToken)
     {
-        return \MbpCoder\Payment\Support\Redirect::to($paymentToken);
+        return Redirect::to($paymentToken);
     }
 
     public function payUrl(string|int $paymentToken): string

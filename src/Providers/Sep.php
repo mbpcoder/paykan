@@ -2,6 +2,7 @@
 
 namespace MbpCoder\Payment\Providers;
 
+use MbpCoder\Payment\Config\Config;
 use MbpCoder\Payment\IPaymentChannel;
 use MbpCoder\Payment\Models\PaymentResponse;
 use Exception;
@@ -40,12 +41,12 @@ class Sep extends Base implements IPaymentChannel
 
         parent::__construct();
 
-        $this->token = \MbpCoder\Payment\Config\Config::get('channels.ipg.provider.sep.token');
-        $this->sendUrl = \MbpCoder\Payment\Config\Config::get('channels.ipg.provider.sep.send_url');
-        $this->paymentUrl = \MbpCoder\Payment\Config\Config::get('channels.ipg.provider.sep.payment_url');
-        $this->verifyUrl = \MbpCoder\Payment\Config\Config::get('channels.ipg.provider.sep.verify_url');
-        if (\MbpCoder\Payment\Config\Config::get('channels.ipg.provider.sep.callback_url')) {
-            $this->callback = \MbpCoder\Payment\Config\Config::get('channels.ipg.provider.sep.callback_url');
+        $this->token = Config::get('channels.ipg.provider.sep.token');
+        $this->sendUrl = Config::get('channels.ipg.provider.sep.send_url');
+        $this->paymentUrl = Config::get('channels.ipg.provider.sep.payment_url');
+        $this->verifyUrl = Config::get('channels.ipg.provider.sep.verify_url');
+        if (Config::get('channels.ipg.provider.sep.callback_url')) {
+            $this->callback = Config::get('channels.ipg.provider.sep.callback_url');
         }
 
         $this->name = "Sep";

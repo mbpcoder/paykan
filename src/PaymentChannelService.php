@@ -2,6 +2,7 @@
 
 namespace MbpCoder\Payment;
 
+use MbpCoder\Payment\Config\Config;
 use MbpCoder\Payment\Models\PaymentResponse;
 use MbpCoder\Payment\Providers\Idpay;
 use MbpCoder\Payment\Support\Str;
@@ -33,7 +34,7 @@ class PaymentChannelService implements IPaymentChannel
      */
     public function getDefaultChannel(): IPaymentChannel|null
     {
-        return $this->getChannel(\MbpCoder\Payment\Config\Config::get('channels.ipg.default'));
+        return $this->getChannel(Config::get('channels.ipg.default'));
     }
 
     /**

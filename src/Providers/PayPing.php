@@ -2,6 +2,7 @@
 
 namespace MbpCoder\Payment\Providers;
 
+use MbpCoder\Payment\Config\Config;
 use MbpCoder\Payment\IPaymentChannel;
 use MbpCoder\Payment\Models\PaymentResponse;
 use MbpCoder\Payment\Models\PaymentStatus;
@@ -15,9 +16,9 @@ class PayPing extends Base implements IPaymentChannel
     {
         parent::__construct();
 
-        $this->token = \MbpCoder\Payment\Config\Config::get('channels.ipg.provider.PayPing.token');
-        $this->sendUrl = \MbpCoder\Payment\Config\Config::get('channels.ipg.provider.PayPing.send_url');
-        $this->verifyUrl = \MbpCoder\Payment\Config\Config::get('channels.ipg.provider.PayPing.verify_url');
+        $this->token = Config::get('channels.ipg.provider.PayPing.token');
+        $this->sendUrl = Config::get('channels.ipg.provider.PayPing.send_url');
+        $this->verifyUrl = Config::get('channels.ipg.provider.PayPing.verify_url');
 
         $this->name = "PayPing";
 
@@ -26,7 +27,6 @@ class PayPing extends Base implements IPaymentChannel
         ];
         $this->client = new Client($clientConstructorParameters);
     }
-
 
     public function initial(int $amount, int|string $trackingCode, string|null $description = null): PaymentResponse
     {

@@ -2,6 +2,8 @@
 
 namespace MbpCoder\Payment\Providers;
 
+use MbpCoder\Payment\Support\Redirect;
+use MbpCoder\Payment\Config\Config;
 use MbpCoder\Payment\IPaymentChannel;
 use MbpCoder\Payment\Models\PaymentResponse;
 use GuzzleHttp\Client;
@@ -40,14 +42,14 @@ class Pay extends Base implements IPaymentChannel
         $clientConstructorParameters = [];
         parent::__construct();
 
-        $this->token = \MbpCoder\Payment\Config\Config::get('channels.ipg.provider.pay.token');
-        $this->sendUrl = \MbpCoder\Payment\Config\Config::get('channels.ipg.provider.pay.send_url');
-        $this->paymentUrl = \MbpCoder\Payment\Config\Config::get('channels.ipg.provider.pay.payment_url');
-        $this->verifyUrl = \MbpCoder\Payment\Config\Config::get('channels.ipg.provider.pay.verify_url');
+        $this->token = Config::get('channels.ipg.provider.pay.token');
+        $this->sendUrl = Config::get('channels.ipg.provider.pay.send_url');
+        $this->paymentUrl = Config::get('channels.ipg.provider.pay.payment_url');
+        $this->verifyUrl = Config::get('channels.ipg.provider.pay.verify_url');
 
         $this->name = "Pay";
 
-        $bindInterface = \MbpCoder\Payment\Config\Config::get('channels.ipg.provider.pay.bind_interface');
+        $bindInterface = Config::get('channels.ipg.provider.pay.bind_interface');
         if ($bindInterface) {
             $clientConstructorParameters['curl'] = [
                 CURLOPT_INTERFACE => $bindInterface,
@@ -83,7 +85,7 @@ class Pay extends Base implements IPaymentChannel
      */
     public function pay($paymentToken)
     {
-        return \MbpCoder\Payment\Support\Redirect::to($this->paymentUrl . $paymentToken);
+        return Redirect::to($this->paymentUrl . $paymentToken);
     }
 
     public function payUrl(string|int $paymentToken): string
@@ -127,6 +129,5 @@ class Pay extends Base implements IPaymentChannel
     {
         return $url;
     }
-
 
 }

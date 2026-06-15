@@ -2,6 +2,8 @@
 
 namespace MbpCoder\Payment\Providers;
 
+use MbpCoder\Payment\Config\Config;
+
 abstract class Base
 {
     protected $name;
@@ -17,7 +19,7 @@ abstract class Base
     public function __construct()
     {
         //set the default callback url
-        $this->callback = \MbpCoder\Payment\Config\Config::get('channels.ipg.callback_url');
+        $this->callback = Config::get('channels.ipg.callback_url');
     }
 
     /**

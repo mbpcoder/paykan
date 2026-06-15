@@ -2,6 +2,8 @@
 
 namespace MbpCoder\Payment\Providers;
 
+use MbpCoder\Payment\Support\Redirect;
+use MbpCoder\Payment\Config\Config;
 use MbpCoder\Payment\IPaymentChannel;
 use MbpCoder\Payment\Models\PaymentResponse;
 use MbpCoder\Payment\Models\PaymentStatus;
@@ -37,7 +39,6 @@ class Zarinpal extends Base implements IPaymentChannel
         '101' => 'تراکنش وریفای شده است.',
     ];
 
-
     private Client $httpClient;
 
     /**
@@ -45,10 +46,10 @@ class Zarinpal extends Base implements IPaymentChannel
      */
     public function __construct(string|null $token = null)
     {
-        $this->token = $token ?? \MbpCoder\Payment\Config\Config::get('channels.ipg.provider.zarinpal.token');
-        $this->sendUrl = \MbpCoder\Payment\Config\Config::get('channels.ipg.provider.zarinpal.send_url');
-        $this->paymentUrl = \MbpCoder\Payment\Config\Config::get('channels.ipg.provider.zarinpal.payment_url');
-        $this->verifyUrl = \MbpCoder\Payment\Config\Config::get('channels.ipg.provider.zarinpal.verify_url');
+        $this->token = $token ?? Config::get('channels.ipg.provider.zarinpal.token');
+        $this->sendUrl = Config::get('channels.ipg.provider.zarinpal.send_url');
+        $this->paymentUrl = Config::get('channels.ipg.provider.zarinpal.payment_url');
+        $this->verifyUrl = Config::get('channels.ipg.provider.zarinpal.verify_url');
 
         $this->name = "Zarinpal";
         $this->httpClient = new Client([
@@ -82,7 +83,7 @@ class Zarinpal extends Base implements IPaymentChannel
 
     public function pay(string|int $paymentToken)
     {
-        return \MbpCoder\Payment\Support\Redirect::to($this->paymentUrl . $paymentToken);
+        return Redirect::to($this->paymentUrl . $paymentToken);
     }
 
     public function payUrl(string|int $paymentToken): string

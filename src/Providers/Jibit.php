@@ -2,6 +2,8 @@
 
 namespace MbpCoder\Payment\Providers;
 
+use MbpCoder\Payment\Support\Redirect;
+use MbpCoder\Payment\Config\Config;
 use MbpCoder\Payment\IPaymentChannel;
 use MbpCoder\Payment\Models\PaymentResponse;
 use MbpCoder\Payment\Models\PaymentStatus;
@@ -50,10 +52,10 @@ class Jibit extends Base implements IPaymentChannel
     {
         parent::__construct();
 
-        $this->token = \MbpCoder\Payment\Config\Config::get('channels.ipg.provider.jibit.api_key');
-        $this->secretKey = \MbpCoder\Payment\Config\Config::get('channels.ipg.provider.jibit.secret_key');
-        $this->baseUrl = \MbpCoder\Payment\Config\Config::get('channels.ipg.provider.jibit.base_url');
-        $this->proxy = \MbpCoder\Payment\Config\Config::get('channels.ipg.provider.jibit.proxy');
+        $this->token = Config::get('channels.ipg.provider.jibit.api_key');
+        $this->secretKey = Config::get('channels.ipg.provider.jibit.secret_key');
+        $this->baseUrl = Config::get('channels.ipg.provider.jibit.base_url');
+        $this->proxy = Config::get('channels.ipg.provider.jibit.proxy');
         $this->currency = 'IRR';
 
         $this->name = "Jibit";
@@ -117,7 +119,7 @@ class Jibit extends Base implements IPaymentChannel
 
     public function pay(string|int $paymentToken)
     {
-        return \MbpCoder\Payment\Support\Redirect::to($paymentToken);
+        return Redirect::to($paymentToken);
     }
 
     public function payUrl(string|int $paymentToken): string
