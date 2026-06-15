@@ -78,6 +78,7 @@ class BehPardakht extends Base implements IPaymentChannel
         return Config::get('channels.ipg.provider.beh_pardakht.' . $key, $default);
     }
 
+    #[\Override]
     public function initial(int $amount, string|int $trackingCode, string|null $description = null): PaymentResponse
     {
         $method = $this->cfg('is_credit') ? 'bpVirtualPayRequest' : 'bpPayRequest';
@@ -115,16 +116,19 @@ class BehPardakht extends Base implements IPaymentChannel
         return $paymentResponse;
     }
 
+    #[\Override]
     public function pay(string|int $paymentToken)
     {
         return FormRedirect::render($this->payUrl($paymentToken), ['RefId' => $paymentToken]);
     }
 
+    #[\Override]
     public function payUrl(string|int $paymentToken): string
     {
         return $this->url('startpay.mellat');
     }
 
+    #[\Override]
     public function verify($paymentToken, $amount, string|null $cardNumber = null, string|int|null $trackingCode = null): PaymentResponse
     {
         $data = [
@@ -159,6 +163,7 @@ class BehPardakht extends Base implements IPaymentChannel
         return $paymentResponse;
     }
 
+    #[\Override]
     public function processCallback(array $params): PaymentResponse
     {
         $paymentResponse = new PaymentResponse();
@@ -172,6 +177,7 @@ class BehPardakht extends Base implements IPaymentChannel
         return $paymentResponse;
     }
 
+    #[\Override]
     public function personalPaymentPage($url, $amount, $name, $phone, $description)
     {
         return $url;

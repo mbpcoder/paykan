@@ -36,6 +36,7 @@ class IsipaymentSamin extends Base implements IPaymentChannel
         return Config::get('channels.ipg.provider.isipayment_samin.' . $key, $default);
     }
 
+    #[\Override]
     public function initial(int $amount, string|int $trackingCode, string|null $description = null): PaymentResponse
     {
         $url = $this->url . 'api/IPGRequestPurchase';
@@ -63,16 +64,19 @@ class IsipaymentSamin extends Base implements IPaymentChannel
         return $paymentResponse;
     }
 
+    #[\Override]
     public function pay(string|int $paymentToken)
     {
         return Redirect::to($this->payUrl($paymentToken));
     }
 
+    #[\Override]
     public function payUrl(string|int $paymentToken): string
     {
         return $this->url . 'IPG?Token=' . $paymentToken;
     }
 
+    #[\Override]
     public function verify($paymentToken, $amount, string|null $cardNumber = null, string|int|null $trackingCode = null): PaymentResponse
     {
         $url = $this->url . 'api/ConfirmTransaction';
@@ -99,6 +103,7 @@ class IsipaymentSamin extends Base implements IPaymentChannel
 
     private ?string $refNo = null;
 
+    #[\Override]
     public function processCallback(array $params): PaymentResponse
     {
         $this->refNo = $params['RefNO'] ?? null;
@@ -114,6 +119,7 @@ class IsipaymentSamin extends Base implements IPaymentChannel
         return $paymentResponse;
     }
 
+    #[\Override]
     public function personalPaymentPage($url, $amount, $name, $phone, $description)
     {
         return $url;

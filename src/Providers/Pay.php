@@ -58,6 +58,7 @@ class Pay extends Base implements IPaymentChannel
         $this->client = new Client($clientConstructorParameters);
     }
 
+    #[\Override]
     public function initial(int $amount, string|int $trackingCode, string|null $description = null): PaymentResponse
     {
         $result = null;
@@ -83,16 +84,19 @@ class Pay extends Base implements IPaymentChannel
      * @param string $paymentToken
      * @return mixed
      */
+    #[\Override]
     public function pay($paymentToken)
     {
         return Redirect::to($this->paymentUrl . $paymentToken);
     }
 
+    #[\Override]
     public function payUrl(string|int $paymentToken): string
     {
         return $paymentToken;
     }
 
+    #[\Override]
     public function processCallback(array $params): PaymentResponse
     {
         $paymentResponse = new PaymentResponse();
@@ -107,6 +111,7 @@ class Pay extends Base implements IPaymentChannel
      * @return array
      * @throws GuzzleException
      */
+    #[\Override]
     public function verify($paymentToken, $amount, string|null $cardNumber = null, string|int|null $trackingCode = null): PaymentResponse
     {
         $result = null;
@@ -125,6 +130,7 @@ class Pay extends Base implements IPaymentChannel
         ];
     }
 
+    #[\Override]
     public function personalPaymentPage($url, $amount, $name, $phone, $description)
     {
         return $url;

@@ -39,6 +39,7 @@ class SnappPay extends Base implements IPaymentChannel
         return Config::get('channels.ipg.provider.snapp_pay.' . $key, $default);
     }
 
+    #[\Override]
     public function initial(int $amount, string|int $trackingCode, string|null $description = null): PaymentResponse
     {
         $result = $this->request('get', 'api/online/offer/v1/eligible', ['amount' => $amount]);
@@ -68,11 +69,13 @@ class SnappPay extends Base implements IPaymentChannel
         return $paymentResponse;
     }
 
+    #[\Override]
     public function pay(string|int $paymentToken)
     {
         return Redirect::to($this->payUrl($paymentToken));
     }
 
+    #[\Override]
     public function payUrl(string|int $paymentToken): string
     {
         $extra = '&venture=8q169w5lz1xkpom0gj2d&vtr=JDJhJDEwJFpjMGs3R1BVQ1A2TVUxUlVEUVBPYS5JVGlLRVZaTDNiVS8zMzE0akxHRURDSGlNTmxnWnpL';
@@ -80,6 +83,7 @@ class SnappPay extends Base implements IPaymentChannel
         return 'https://payment.snapppay.ir/?paymentToken=' . $paymentToken . $extra;
     }
 
+    #[\Override]
     public function verify($paymentToken, $amount, string|null $cardNumber = null, string|int|null $trackingCode = null): PaymentResponse
     {
         $data = [
@@ -99,6 +103,7 @@ class SnappPay extends Base implements IPaymentChannel
         return $paymentResponse;
     }
 
+    #[\Override]
     public function processCallback(array $params): PaymentResponse
     {
         $paymentResponse = new PaymentResponse();
@@ -111,6 +116,7 @@ class SnappPay extends Base implements IPaymentChannel
         return $paymentResponse;
     }
 
+    #[\Override]
     public function personalPaymentPage($url, $amount, $name, $phone, $description)
     {
         return $url;

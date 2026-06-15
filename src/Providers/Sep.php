@@ -52,6 +52,7 @@ class Sep extends Base implements IPaymentChannel
         $this->name = "Sep";
     }
 
+    #[\Override]
     public function initial(int $amount, string|int $trackingCode, string|null $description = null): PaymentResponse
     {
         $client = new \SoapClient($this->sendUrl);
@@ -71,16 +72,19 @@ class Sep extends Base implements IPaymentChannel
 
     }
 
+    #[\Override]
     public function pay($paymentToken)
     {
         return "<html><body><script>var form=document.createElement('FORM'),token=document.createElement('INPUT'),url=document.createElement('INPUT');token.name='Token';token.value='{$paymentToken}';url.name='RedirectUrl';url.value='{$this->callback}';form.method='POST';form.action='{$this->paymentUrl}';form.appendChild(token);form.appendChild(url);document.body.appendChild(form);form.submit();</script></body></html>";
     }
 
+    #[\Override]
     public function payUrl(string|int $paymentToken): string
     {
         return $paymentToken;
     }
 
+    #[\Override]
     public function verify($paymentToken, $amount, string|null $cardNumber = null, string|int|null $trackingCode = null): PaymentResponse
     {
         $client = new \SoapClient($this->verifyUrl);
@@ -97,11 +101,13 @@ class Sep extends Base implements IPaymentChannel
         ];
     }
 
+    #[\Override]
     public function personalPaymentPage($url, $amount, $name, $phone, $description)
     {
         return $url;
     }
 
+    #[\Override]
     public function processCallback(array $params): PaymentResponse
     {
         // TODO: Implement processCallback() method.

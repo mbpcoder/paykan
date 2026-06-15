@@ -28,31 +28,37 @@ class PayPing extends Base implements IPaymentChannel
         $this->client = new Client($clientConstructorParameters);
     }
 
+    #[\Override]
     public function initial(int $amount, int|string $trackingCode, string|null $description = null): PaymentResponse
     {
         // TODO: Implement initial() method.
     }
 
+    #[\Override]
     public function pay(int|string $paymentToken)
     {
         // TODO: Implement pay() method.
     }
 
+    #[\Override]
     public function payUrl(int|string $paymentToken): string
     {
         // TODO: Implement payUrl() method.
     }
 
+    #[\Override]
     public function verify(int|string $paymentToken, int $amount, ?string $cardNumber = null, int|string|null $trackingCode = null): PaymentResponse
     {
         // TODO: Implement verify() method.
     }
 
+    #[\Override]
     public function processCallback(array $params): PaymentResponse
     {
         // TODO: Implement processCallback() method.
     }
 
+    #[\Override]
     public function personalPaymentPage($url, $amount, $name, $phone, $description)
     {
         // TODO: Implement personalPaymentPage() method.

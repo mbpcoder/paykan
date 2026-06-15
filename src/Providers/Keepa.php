@@ -52,6 +52,7 @@ class Keepa extends Base implements IPaymentChannel
         return Config::get('channels.ipg.provider.keepa.' . $key, $default);
     }
 
+    #[\Override]
     public function initial(int $amount, string|int $trackingCode, string|null $description = null): PaymentResponse
     {
         $url = $this->url . 'request_payment_token';
@@ -72,16 +73,19 @@ class Keepa extends Base implements IPaymentChannel
         return $paymentResponse;
     }
 
+    #[\Override]
     public function pay(string|int $paymentToken)
     {
         return FormRedirect::render($this->payUrl($paymentToken), ['payment_token' => $paymentToken]);
     }
 
+    #[\Override]
     public function payUrl(string|int $paymentToken): string
     {
         return 'https://ipg.kipaa.ir';
     }
 
+    #[\Override]
     public function verify($paymentToken, $amount, string|null $cardNumber = null, string|int|null $trackingCode = null): PaymentResponse
     {
         $data = [
@@ -117,6 +121,7 @@ class Keepa extends Base implements IPaymentChannel
 
     private string|int|null $recieptNumber = null;
 
+    #[\Override]
     public function processCallback(array $params): PaymentResponse
     {
         $this->recieptNumber = $params['reciept_number'] ?? null;
@@ -131,6 +136,7 @@ class Keepa extends Base implements IPaymentChannel
         return $paymentResponse;
     }
 
+    #[\Override]
     public function personalPaymentPage($url, $amount, $name, $phone, $description)
     {
         return $url;

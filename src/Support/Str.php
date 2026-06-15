@@ -15,12 +15,10 @@ final class Str
      */
     public static function contains(string $haystack, string|array $needles): bool
     {
-        foreach ((array) $needles as $needle) {
-            if ($needle !== '' && str_contains($haystack, $needle)) {
-                return true;
-            }
-        }
-        return false;
+        return array_any(
+            (array) $needles,
+            static fn (string $needle): bool => $needle !== '' && str_contains($haystack, $needle)
+        );
     }
 
     /**

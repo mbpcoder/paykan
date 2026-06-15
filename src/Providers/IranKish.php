@@ -92,6 +92,7 @@ class IranKish extends Base implements IPaymentChannel
         return Config::get('channels.ipg.provider.iran_kish.' . $key, $default);
     }
 
+    #[\Override]
     public function initial(int $amount, string|int $trackingCode, string|null $description = null): PaymentResponse
     {
         $url = $this->url . 'api/v3/tokenization/make';
@@ -130,16 +131,19 @@ class IranKish extends Base implements IPaymentChannel
         return $paymentResponse;
     }
 
+    #[\Override]
     public function pay(string|int $paymentToken)
     {
         return FormRedirect::render($this->payUrl($paymentToken), ['tokenIdentity' => $paymentToken]);
     }
 
+    #[\Override]
     public function payUrl(string|int $paymentToken): string
     {
         return $this->url . 'iuiv3/IPG/Index/';
     }
 
+    #[\Override]
     public function verify($paymentToken, $amount, string|null $cardNumber = null, string|int|null $trackingCode = null): PaymentResponse
     {
         $url = $this->url . 'api/v3/confirmation/purchase';
@@ -169,6 +173,7 @@ class IranKish extends Base implements IPaymentChannel
     private ?string $retrievalReferenceNumber = null;
     private ?string $systemTraceAuditNumber = null;
 
+    #[\Override]
     public function processCallback(array $params): PaymentResponse
     {
         $this->retrievalReferenceNumber = $params['retrievalReferenceNumber'] ?? null;
@@ -186,6 +191,7 @@ class IranKish extends Base implements IPaymentChannel
         return $paymentResponse;
     }
 
+    #[\Override]
     public function personalPaymentPage($url, $amount, $name, $phone, $description)
     {
         return $url;

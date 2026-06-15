@@ -42,6 +42,7 @@ class Sepehrpay extends Base implements IPaymentChannel
         return Config::get('channels.ipg.provider.sepehrpay.' . $key, $default);
     }
 
+    #[\Override]
     public function initial(int $amount, string|int $trackingCode, string|null $description = null): PaymentResponse
     {
         $url = $this->url . 'GetToken';
@@ -66,6 +67,7 @@ class Sepehrpay extends Base implements IPaymentChannel
         return $paymentResponse;
     }
 
+    #[\Override]
     public function pay(string|int $paymentToken)
     {
         return FormRedirect::render($this->payUrl($paymentToken), [
@@ -74,11 +76,13 @@ class Sepehrpay extends Base implements IPaymentChannel
         ]);
     }
 
+    #[\Override]
     public function payUrl(string|int $paymentToken): string
     {
         return 'https://sepehr.shaparak.ir:8080';
     }
 
+    #[\Override]
     public function verify($paymentToken, $amount, string|null $cardNumber = null, string|int|null $trackingCode = null): PaymentResponse
     {
         $url = $this->url . 'Advice';
@@ -103,6 +107,7 @@ class Sepehrpay extends Base implements IPaymentChannel
         return $paymentResponse;
     }
 
+    #[\Override]
     public function processCallback(array $params): PaymentResponse
     {
         $paymentResponse = new PaymentResponse();
@@ -117,6 +122,7 @@ class Sepehrpay extends Base implements IPaymentChannel
         return $paymentResponse;
     }
 
+    #[\Override]
     public function personalPaymentPage($url, $amount, $name, $phone, $description)
     {
         return $url;

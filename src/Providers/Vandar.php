@@ -28,6 +28,7 @@ class Vandar extends Base implements IPaymentChannel
         return Config::get('channels.ipg.provider.vandar.' . $key, $default);
     }
 
+    #[\Override]
     public function initial(int $amount, string|int $trackingCode, string|null $description = null): PaymentResponse
     {
         $data = [
@@ -52,16 +53,19 @@ class Vandar extends Base implements IPaymentChannel
         return $paymentResponse;
     }
 
+    #[\Override]
     public function pay(string|int $paymentToken)
     {
         return Redirect::to($this->payUrl($paymentToken));
     }
 
+    #[\Override]
     public function payUrl(string|int $paymentToken): string
     {
         return $this->url . 'v4/' . $paymentToken;
     }
 
+    #[\Override]
     public function verify($paymentToken, $amount, string|null $cardNumber = null, string|int|null $trackingCode = null): PaymentResponse
     {
         $data = [
@@ -81,6 +85,7 @@ class Vandar extends Base implements IPaymentChannel
         return $paymentResponse;
     }
 
+    #[\Override]
     public function processCallback(array $params): PaymentResponse
     {
         $paymentResponse = new PaymentResponse();
@@ -92,6 +97,7 @@ class Vandar extends Base implements IPaymentChannel
         return $paymentResponse;
     }
 
+    #[\Override]
     public function personalPaymentPage($url, $amount, $name, $phone, $description)
     {
         return $url;

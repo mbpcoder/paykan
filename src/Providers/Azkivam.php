@@ -53,6 +53,7 @@ class Azkivam extends Base implements IPaymentChannel
         return Config::get('channels.ipg.provider.azkivam.' . $key, $default);
     }
 
+    #[\Override]
     public function initial(int $amount, string|int $trackingCode, string|null $description = null): PaymentResponse
     {
         $params = [
@@ -76,16 +77,19 @@ class Azkivam extends Base implements IPaymentChannel
         return $paymentResponse;
     }
 
+    #[\Override]
     public function pay(string|int $paymentToken)
     {
         return Redirect::to($this->payUrl($paymentToken));
     }
 
+    #[\Override]
     public function payUrl(string|int $paymentToken): string
     {
         return 'https://panel.azkivam.com/payment/?ticketId=' . $paymentToken;
     }
 
+    #[\Override]
     public function verify($paymentToken, $amount, string|null $cardNumber = null, string|int|null $trackingCode = null): PaymentResponse
     {
         $params = [
@@ -104,6 +108,7 @@ class Azkivam extends Base implements IPaymentChannel
         return $paymentResponse;
     }
 
+    #[\Override]
     public function processCallback(array $params): PaymentResponse
     {
         $default = [
@@ -119,6 +124,7 @@ class Azkivam extends Base implements IPaymentChannel
         return $paymentResponse;
     }
 
+    #[\Override]
     public function personalPaymentPage($url, $amount, $name, $phone, $description)
     {
         return $url;

@@ -85,36 +85,43 @@ class PaymentChannelService implements IPaymentChannel
     /**
      * @param $callbackUrl
      */
+    #[\Override]
     public function setCallbackUrl($callbackUrl): void
     {
         $this->gateway->setCallbackUrl($callbackUrl);
     }
 
+    #[\Override]
     public function initial(int $amount, string|int $trackingCode, string|null $description = null): PaymentResponse
     {
         return $this->gateway->initial($amount, $trackingCode, $description);
     }
 
+    #[\Override]
     public function pay(string|int $paymentToken)
     {
         return $this->gateway->pay($paymentToken);
     }
 
+    #[\Override]
     public function payUrl(int|string $paymentToken): string
     {
         return $this->gateway->payUrl($paymentToken);
     }
 
+    #[\Override]
     public function processCallback(array $params): PaymentResponse
     {
         return $this->gateway->processCallback($params);
     }
 
+    #[\Override]
     public function verify($paymentToken, $amount, string|null $cardNumber = null, string|int|null $trackingCode = null): PaymentResponse
     {
         return $this->gateway->verify($paymentToken, $amount, $cardNumber, $trackingCode);
     }
 
+    #[\Override]
     public function personalPaymentPage($url, $amount, $name = null, $phone = null, $description = null)
     {
         if (!is_null($this->gateway)) {

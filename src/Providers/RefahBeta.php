@@ -43,6 +43,7 @@ class RefahBeta extends Base implements IPaymentChannel
         return Config::get('channels.ipg.provider.refah_beta.' . $key, $default);
     }
 
+    #[\Override]
     public function initial(int $amount, string|int $trackingCode, string|null $description = null): PaymentResponse
     {
         $nationalId = (string) $this->cfg('national_id', '');
@@ -81,16 +82,19 @@ class RefahBeta extends Base implements IPaymentChannel
         return $paymentResponse;
     }
 
+    #[\Override]
     public function pay(string|int $paymentToken)
     {
         return FormRedirect::render($this->payUrl($paymentToken), ['otp' => '']);
     }
 
+    #[\Override]
     public function payUrl(string|int $paymentToken): string
     {
         return $this->callback;
     }
 
+    #[\Override]
     public function verify($paymentToken, $amount, string|null $cardNumber = null, string|int|null $trackingCode = null, array $params = []): PaymentResponse
     {
         $nationalId = (string) $this->cfg('national_id', '');
@@ -121,6 +125,7 @@ class RefahBeta extends Base implements IPaymentChannel
         return $paymentResponse;
     }
 
+    #[\Override]
     public function processCallback(array $params): PaymentResponse
     {
         $paymentResponse = new PaymentResponse();
@@ -132,6 +137,7 @@ class RefahBeta extends Base implements IPaymentChannel
         return $paymentResponse;
     }
 
+    #[\Override]
     public function personalPaymentPage($url, $amount, $name, $phone, $description)
     {
         return $url;
