@@ -1,13 +1,11 @@
 <?php
 
-namespace App\Channels\PaymentChannels\Providers;
+namespace MbpCoder\IranPayment\Providers;
 
-use App\Channels\PaymentChannels\IPaymentChannel;
-use App\Channels\PaymentChannels\Models\PaymentResponse;
+use MbpCoder\IranPayment\IPaymentChannel;
+use MbpCoder\IranPayment\Models\PaymentResponse;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Routing\Redirector;
 
 class Pay extends Base implements IPaymentChannel
 {
@@ -42,16 +40,17 @@ class Pay extends Base implements IPaymentChannel
         $clientConstructorParameters = [];
         parent::__construct();
 
-        $this->token = config('channels.ipg.provider.pay.token');
-        $this->sendUrl = config('channels.ipg.provider.pay.send_url');
-        $this->paymentUrl = config('channels.ipg.provider.pay.payment_url');
-        $this->verifyUrl = config('channels.ipg.provider.pay.verify_url');
+        $this->token = \MbpCoder\IranPayment\Config\Config::get('channels.ipg.provider.pay.token');
+        $this->sendUrl = \MbpCoder\IranPayment\Config\Config::get('channels.ipg.provider.pay.send_url');
+        $this->paymentUrl = \MbpCoder\IranPayment\Config\Config::get('channels.ipg.provider.pay.payment_url');
+        $this->verifyUrl = \MbpCoder\IranPayment\Config\Config::get('channels.ipg.provider.pay.verify_url');
 
         $this->name = "Pay";
 
-        if (!app()->isLocal()) {
+        $bindInterface = \MbpCoder\IranPayment\Config\Config::get('channels.ipg.provider.pay.bind_interface');
+        if ($bindInterface) {
             $clientConstructorParameters['curl'] = [
-                CURLOPT_INTERFACE => '49.12.114.48',
+                CURLOPT_INTERFACE => $bindInterface,
             ];
         }
         $this->client = new Client($clientConstructorParameters);
@@ -80,11 +79,11 @@ class Pay extends Base implements IPaymentChannel
 
     /**
      * @param string $paymentToken
-     * @return RedirectResponse|Redirector|mixed
+     * @return mixed
      */
     public function pay($paymentToken)
     {
-        return redirect($this->paymentUrl . $paymentToken);
+        return \MbpCoder\IranPayment\Support\Redirect::to($this->paymentUrl . $paymentToken);
     }
 
     public function payUrl(string|int $paymentToken): string

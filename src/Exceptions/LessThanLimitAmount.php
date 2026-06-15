@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Channels\PaymentChannels\Exceptions;
+namespace MbpCoder\IranPayment\Exceptions;
 
 use Exception;
 use Throwable;

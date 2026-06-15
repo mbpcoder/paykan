@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Channels\PaymentChannels\Providers;
+namespace MbpCoder\IranPayment\Providers;
 
-use App\Channels\PaymentChannels\IPaymentChannel;
-use App\Channels\PaymentChannels\Models\PaymentResponse;
+use MbpCoder\IranPayment\IPaymentChannel;
+use MbpCoder\IranPayment\Models\PaymentResponse;
 
 class Idpay extends Base implements IPaymentChannel
 {

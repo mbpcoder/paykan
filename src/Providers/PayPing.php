@@ -1,12 +1,11 @@
 <?php
 
-namespace App\Channels\PaymentChannels\Providers;
+namespace MbpCoder\IranPayment\Providers;
 
-use App\Channels\PaymentChannels\IPaymentChannel;
-use App\Channels\PaymentChannels\Models\PaymentResponse;
-use App\Channels\PaymentChannels\Models\PaymentStatus;
+use MbpCoder\IranPayment\IPaymentChannel;
+use MbpCoder\IranPayment\Models\PaymentResponse;
+use MbpCoder\IranPayment\Models\PaymentStatus;
 use GuzzleHttp\Client;
-use Illuminate\Support\Facades\Http;
 
 class PayPing extends Base implements IPaymentChannel
 {
@@ -16,9 +15,9 @@ class PayPing extends Base implements IPaymentChannel
     {
         parent::__construct();
 
-        $this->token = config('channels.ipg.provider.PayPing.token');
-        $this->sendUrl = config('channels.ipg.provider.PayPing.send_url');
-        $this->verifyUrl = config('channels.ipg.provider.PayPing.verify_url');
+        $this->token = \MbpCoder\IranPayment\Config\Config::get('channels.ipg.provider.PayPing.token');
+        $this->sendUrl = \MbpCoder\IranPayment\Config\Config::get('channels.ipg.provider.PayPing.send_url');
+        $this->verifyUrl = \MbpCoder\IranPayment\Config\Config::get('channels.ipg.provider.PayPing.verify_url');
 
         $this->name = "PayPing";
 

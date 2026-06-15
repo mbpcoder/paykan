@@ -1,14 +1,11 @@
 <?php
 
-namespace App\Channels\PaymentChannels\Providers;
+namespace MbpCoder\IranPayment\Providers;
 
-use App\Channels\PaymentChannels\Exceptions\InvalidApiAmount;
-use App\Channels\PaymentChannels\IPaymentChannel;
-use App\Channels\PaymentChannels\Models\PaymentResponse;
-use App\Channels\PaymentChannels\Models\PaymentStatus;
-use GuzzleHttp\Client;
-use Illuminate\Http\Client\PendingRequest;
-use Illuminate\Support\Facades\Http;
+use MbpCoder\IranPayment\IPaymentChannel;
+use MbpCoder\IranPayment\Models\PaymentResponse;
+use MbpCoder\IranPayment\Models\PaymentStatus;
+use MbpCoder\IranPayment\Support\Http\Http;
 
 class Jibit extends Base implements IPaymentChannel
 {
@@ -40,7 +37,7 @@ class Jibit extends Base implements IPaymentChannel
         'server.error' => 'یه خطایی پیش آمده است',
     ];
 
-    private PendingRequest $httpClient;
+    private Http $httpClient;
     private string $secretKey;
     private string $baseUrl;
     private string $currency;
@@ -53,10 +50,10 @@ class Jibit extends Base implements IPaymentChannel
     {
         parent::__construct();
 
-        $this->token = config('channels.ipg.provider.jibit.api_key');
-        $this->secretKey = config('channels.ipg.provider.jibit.secret_key');
-        $this->baseUrl = config('channels.ipg.provider.jibit.base_url');
-        $this->proxy = config('channels.ipg.provider.jibit.proxy');
+        $this->token = \MbpCoder\IranPayment\Config\Config::get('channels.ipg.provider.jibit.api_key');
+        $this->secretKey = \MbpCoder\IranPayment\Config\Config::get('channels.ipg.provider.jibit.secret_key');
+        $this->baseUrl = \MbpCoder\IranPayment\Config\Config::get('channels.ipg.provider.jibit.base_url');
+        $this->proxy = \MbpCoder\IranPayment\Config\Config::get('channels.ipg.provider.jibit.proxy');
         $this->currency = 'IRR';
 
         $this->name = "Jibit";
@@ -120,7 +117,7 @@ class Jibit extends Base implements IPaymentChannel
 
     public function pay(string|int $paymentToken)
     {
-        return redirect($paymentToken);
+        return \MbpCoder\IranPayment\Support\Redirect::to($paymentToken);
     }
 
     public function payUrl(string|int $paymentToken): string

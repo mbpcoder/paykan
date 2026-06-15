@@ -1,13 +1,11 @@
 <?php
 
-namespace App\Channels\PaymentChannels\Providers;
+namespace MbpCoder\IranPayment\Providers;
 
-use App\Channels\PaymentChannels\Exceptions\InvalidApiAmount;
-use App\Channels\PaymentChannels\IPaymentChannel;
-use App\Channels\PaymentChannels\Models\PaymentResponse;
-use App\Channels\PaymentChannels\Models\PaymentStatus;
-use GuzzleHttp\Client;
-use Illuminate\Support\Facades\Http;
+use MbpCoder\IranPayment\IPaymentChannel;
+use MbpCoder\IranPayment\Models\PaymentResponse;
+use MbpCoder\IranPayment\Models\PaymentStatus;
+use MbpCoder\IranPayment\Support\Http\Http;
 
 class PayStar extends Base implements IPaymentChannel
 {
@@ -41,9 +39,9 @@ class PayStar extends Base implements IPaymentChannel
     {
         parent::__construct();
 
-        $this->token = config('channels.ipg.provider.pay_star.token');
-        $this->gateWayId = config('channels.ipg.provider.pay_star.gateway_id');
-        $this->baseUrl = config('channels.ipg.provider.pay_star.base_url');
+        $this->token = \MbpCoder\IranPayment\Config\Config::get('channels.ipg.provider.pay_star.token');
+        $this->gateWayId = \MbpCoder\IranPayment\Config\Config::get('channels.ipg.provider.pay_star.gateway_id');
+        $this->baseUrl = \MbpCoder\IranPayment\Config\Config::get('channels.ipg.provider.pay_star.base_url');
         $this->currency = 'IRR';
 
         $this->name = "PayStar";
@@ -86,7 +84,7 @@ class PayStar extends Base implements IPaymentChannel
 
     public function pay(string|int $paymentToken)
     {
-        return redirect($this->baseUrl . '/payment?token=' . $paymentToken);
+        return \MbpCoder\IranPayment\Support\Redirect::to($this->baseUrl . '/payment?token=' . $paymentToken);
     }
 
     public function payUrl(string|int $paymentToken): string

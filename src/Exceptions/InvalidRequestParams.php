@@ -1,11 +1,7 @@
 <?php
 
-namespace App\Channels\PaymentChannels\Exceptions;
+namespace MbpCoder\IranPayment\Exceptions;
 
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\GuzzleException;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Routing\Redirector;
 use Throwable;
 
 class InvalidRequestParams extends \Exception

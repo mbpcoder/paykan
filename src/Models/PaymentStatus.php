@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Channels\PaymentChannels\Models;
+namespace MbpCoder\IranPayment\Models;
 
 enum PaymentStatus: string
 {
