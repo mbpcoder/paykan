@@ -1,6 +1,6 @@
 <?php
 
-namespace MbpCoder\IranPayment\Support\Http;
+namespace MbpCoder\Payment\Support\Http;
 
 use GuzzleHttp\Client;
 

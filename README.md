@@ -1,6 +1,6 @@
-# PHP Iran Payment
+# PHP Payment
 
-A framework-agnostic PHP package for working with Iranian payment gateways
+A framework-agnostic PHP package for working with payment gateways
 (Zarinpal, IDPay, Pay.ir, Jibit, Sep, PayPing, Bahamta, PayStar) with
 first-class integrations for **Laravel** and **Symfony**, and a plain-PHP
 fallback.
@@ -8,27 +8,27 @@ fallback.
 ## Installation
 
 ```bash
-composer require mbpcoder/php-iran-payment
+composer require mbpcoder/php-payment
 ```
 
 Requires PHP >= 8.1.
 
 ## Architecture
 
-The core (`MbpCoder\IranPayment\PaymentChannelService` and the gateway
+The core (`MbpCoder\Payment\PaymentChannelService` and the gateway
 providers) has no framework dependency. Two small seams make it portable:
 
-- **Config** – `MbpCoder\IranPayment\Config\Config` is a static accessor backed
+- **Config** – `MbpCoder\Payment\Config\Config` is a static accessor backed
   by a swappable `ConfigRepositoryInterface`. Each integration points it at the
   framework's own config.
-- **Redirect** – `MbpCoder\IranPayment\Support\Redirect` resolves gateway
+- **Redirect** – `MbpCoder\Payment\Support\Redirect` resolves gateway
   redirects through a pluggable handler so each framework gets its native
   redirect object.
 
 ## Usage (any framework)
 
 ```php
-use MbpCoder\IranPayment\PaymentChannelService;
+use MbpCoder\Payment\PaymentChannelService;
 
 $payment = new PaymentChannelService('zarinpal'); // or null for the default
 $response = $payment->initial(amount: 10000, trackingCode: 'order-42');
@@ -48,24 +48,24 @@ $result->isSuccess(); // true / false
 
 ## Laravel
 
-Auto-discovery registers the service provider and the `IranPayment` facade.
+Auto-discovery registers the service provider and the `Payment` facade.
 Publish the config:
 
 ```bash
-php artisan vendor:publish --tag=iran-payment-config
+php artisan vendor:publish --tag=payment-config
 ```
 
 This creates `config/channels.php`. Set your gateway credentials there (or via
 the `.env` keys it references), then:
 
 ```php
-use MbpCoder\IranPayment\PaymentChannelService;
+use MbpCoder\Payment\PaymentChannelService;
 
 $payment = app(PaymentChannelService::class);   // default gateway
 $payment = new PaymentChannelService('zarinpal'); // a specific gateway
 
 // or via the facade
-IranPayment::initial(10000, 'order-42');
+Payment::initial(10000, 'order-42');
 ```
 
 `pay()` returns a Laravel redirect, so you can `return` it from a controller.
@@ -78,15 +78,15 @@ Register the bundle:
 // config/bundles.php
 return [
     // ...
-    MbpCoder\IranPayment\Symfony\IranPaymentBundle::class => ['all' => true],
+    MbpCoder\Payment\Symfony\PaymentBundle::class => ['all' => true],
 ];
 ```
 
 Configure it:
 
 ```yaml
-# config/packages/iran_payment.yaml
-iran_payment:
+# config/packages/payment.yaml
+payment:
     default: zarinpal
     callback_url: 'https://example.com/payment/callback'
     provider:
@@ -100,7 +100,7 @@ iran_payment:
 Inject the service:
 
 ```php
-use MbpCoder\IranPayment\PaymentChannelService;
+use MbpCoder\Payment\PaymentChannelService;
 
 public function checkout(PaymentChannelService $payment) {
     $response = $payment->initial(10000, 'order-42');
@@ -115,8 +115,8 @@ public function checkout(PaymentChannelService $payment) {
 Provide configuration manually:
 
 ```php
-use MbpCoder\IranPayment\Config\Config;
-use MbpCoder\IranPayment\Config\ArrayConfigRepository;
+use MbpCoder\Payment\Config\Config;
+use MbpCoder\Payment\Config\ArrayConfigRepository;
 
 Config::setRepository(new ArrayConfigRepository(
     require __DIR__ . '/config/channels.php'
@@ -124,7 +124,7 @@ Config::setRepository(new ArrayConfigRepository(
 ```
 
 `pay()` then emits a `Location` header by default. Register a custom redirect
-handler with `MbpCoder\IranPayment\Support\Redirect::setHandler(...)` if needed.
+handler with `MbpCoder\Payment\Support\Redirect::setHandler(...)` if needed.
 
 ## Supported gateways
 

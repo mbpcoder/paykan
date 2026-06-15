@@ -1,11 +1,11 @@
 <?php
 
-namespace MbpCoder\IranPayment\Providers;
+namespace MbpCoder\Payment\Providers;
 
-use MbpCoder\IranPayment\IPaymentChannel;
-use MbpCoder\IranPayment\Models\PaymentResponse;
-use MbpCoder\IranPayment\Models\PaymentStatus;
-use MbpCoder\IranPayment\Support\Http\Http;
+use MbpCoder\Payment\IPaymentChannel;
+use MbpCoder\Payment\Models\PaymentResponse;
+use MbpCoder\Payment\Models\PaymentStatus;
+use MbpCoder\Payment\Support\Http\Http;
 
 class PayStar extends Base implements IPaymentChannel
 {
@@ -39,9 +39,9 @@ class PayStar extends Base implements IPaymentChannel
     {
         parent::__construct();
 
-        $this->token = \MbpCoder\IranPayment\Config\Config::get('channels.ipg.provider.pay_star.token');
-        $this->gateWayId = \MbpCoder\IranPayment\Config\Config::get('channels.ipg.provider.pay_star.gateway_id');
-        $this->baseUrl = \MbpCoder\IranPayment\Config\Config::get('channels.ipg.provider.pay_star.base_url');
+        $this->token = \MbpCoder\Payment\Config\Config::get('channels.ipg.provider.pay_star.token');
+        $this->gateWayId = \MbpCoder\Payment\Config\Config::get('channels.ipg.provider.pay_star.gateway_id');
+        $this->baseUrl = \MbpCoder\Payment\Config\Config::get('channels.ipg.provider.pay_star.base_url');
         $this->currency = 'IRR';
 
         $this->name = "PayStar";
@@ -84,7 +84,7 @@ class PayStar extends Base implements IPaymentChannel
 
     public function pay(string|int $paymentToken)
     {
-        return \MbpCoder\IranPayment\Support\Redirect::to($this->baseUrl . '/payment?token=' . $paymentToken);
+        return \MbpCoder\Payment\Support\Redirect::to($this->baseUrl . '/payment?token=' . $paymentToken);
     }
 
     public function payUrl(string|int $paymentToken): string

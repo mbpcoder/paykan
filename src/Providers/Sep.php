@@ -1,9 +1,9 @@
 <?php
 
-namespace MbpCoder\IranPayment\Providers;
+namespace MbpCoder\Payment\Providers;
 
-use MbpCoder\IranPayment\IPaymentChannel;
-use MbpCoder\IranPayment\Models\PaymentResponse;
+use MbpCoder\Payment\IPaymentChannel;
+use MbpCoder\Payment\Models\PaymentResponse;
 use Exception;
 
 class Sep extends Base implements IPaymentChannel
@@ -40,12 +40,12 @@ class Sep extends Base implements IPaymentChannel
 
         parent::__construct();
 
-        $this->token = \MbpCoder\IranPayment\Config\Config::get('channels.ipg.provider.sep.token');
-        $this->sendUrl = \MbpCoder\IranPayment\Config\Config::get('channels.ipg.provider.sep.send_url');
-        $this->paymentUrl = \MbpCoder\IranPayment\Config\Config::get('channels.ipg.provider.sep.payment_url');
-        $this->verifyUrl = \MbpCoder\IranPayment\Config\Config::get('channels.ipg.provider.sep.verify_url');
-        if (\MbpCoder\IranPayment\Config\Config::get('channels.ipg.provider.sep.callback_url')) {
-            $this->callback = \MbpCoder\IranPayment\Config\Config::get('channels.ipg.provider.sep.callback_url');
+        $this->token = \MbpCoder\Payment\Config\Config::get('channels.ipg.provider.sep.token');
+        $this->sendUrl = \MbpCoder\Payment\Config\Config::get('channels.ipg.provider.sep.send_url');
+        $this->paymentUrl = \MbpCoder\Payment\Config\Config::get('channels.ipg.provider.sep.payment_url');
+        $this->verifyUrl = \MbpCoder\Payment\Config\Config::get('channels.ipg.provider.sep.verify_url');
+        if (\MbpCoder\Payment\Config\Config::get('channels.ipg.provider.sep.callback_url')) {
+            $this->callback = \MbpCoder\Payment\Config\Config::get('channels.ipg.provider.sep.callback_url');
         }
 
         $this->name = "Sep";

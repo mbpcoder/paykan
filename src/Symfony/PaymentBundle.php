@@ -1,26 +1,26 @@
 <?php
 
-namespace MbpCoder\IranPayment\Symfony;
+namespace MbpCoder\Payment\Symfony;
 
-use MbpCoder\IranPayment\Config\ArrayConfigRepository;
-use MbpCoder\IranPayment\Config\Config;
-use MbpCoder\IranPayment\Support\Redirect;
-use MbpCoder\IranPayment\Symfony\DependencyInjection\IranPaymentExtension;
+use MbpCoder\Payment\Config\ArrayConfigRepository;
+use MbpCoder\Payment\Config\Config;
+use MbpCoder\Payment\Support\Redirect;
+use MbpCoder\Payment\Symfony\DependencyInjection\PaymentExtension;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
-class IranPaymentBundle extends Bundle
+class PaymentBundle extends Bundle
 {
     public function getContainerExtension(): ?ExtensionInterface
     {
-        return new IranPaymentExtension();
+        return new PaymentExtension();
     }
 
     public function boot(): void
     {
         // Wire the package's static config accessor to the resolved bundle config.
-        $config = $this->container->getParameter('iran_payment.config');
+        $config = $this->container->getParameter('payment.config');
         Config::setRepository(new ArrayConfigRepository($config));
 
         // Gateway redirects return a Symfony RedirectResponse.

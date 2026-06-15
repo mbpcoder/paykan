@@ -1,6 +1,6 @@
 <?php
 
-namespace MbpCoder\IranPayment\Support;
+namespace MbpCoder\Payment\Support;
 
 /**
  * Minimal, framework-agnostic string helpers used by the package so it does

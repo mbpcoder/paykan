@@ -1,10 +1,10 @@
 <?php
 
-namespace MbpCoder\IranPayment\Providers;
+namespace MbpCoder\Payment\Providers;
 
-use MbpCoder\IranPayment\IPaymentChannel;
-use MbpCoder\IranPayment\Models\PaymentResponse;
-use MbpCoder\IranPayment\Models\PaymentStatus;
+use MbpCoder\Payment\IPaymentChannel;
+use MbpCoder\Payment\Models\PaymentResponse;
+use MbpCoder\Payment\Models\PaymentStatus;
 use GuzzleHttp\Client;
 
 class Zarinpal extends Base implements IPaymentChannel
@@ -45,10 +45,10 @@ class Zarinpal extends Base implements IPaymentChannel
      */
     public function __construct(string|null $token = null)
     {
-        $this->token = $token ?? \MbpCoder\IranPayment\Config\Config::get('channels.ipg.provider.zarinpal.token');
-        $this->sendUrl = \MbpCoder\IranPayment\Config\Config::get('channels.ipg.provider.zarinpal.send_url');
-        $this->paymentUrl = \MbpCoder\IranPayment\Config\Config::get('channels.ipg.provider.zarinpal.payment_url');
-        $this->verifyUrl = \MbpCoder\IranPayment\Config\Config::get('channels.ipg.provider.zarinpal.verify_url');
+        $this->token = $token ?? \MbpCoder\Payment\Config\Config::get('channels.ipg.provider.zarinpal.token');
+        $this->sendUrl = \MbpCoder\Payment\Config\Config::get('channels.ipg.provider.zarinpal.send_url');
+        $this->paymentUrl = \MbpCoder\Payment\Config\Config::get('channels.ipg.provider.zarinpal.payment_url');
+        $this->verifyUrl = \MbpCoder\Payment\Config\Config::get('channels.ipg.provider.zarinpal.verify_url');
 
         $this->name = "Zarinpal";
         $this->httpClient = new Client([
@@ -82,7 +82,7 @@ class Zarinpal extends Base implements IPaymentChannel
 
     public function pay(string|int $paymentToken)
     {
-        return \MbpCoder\IranPayment\Support\Redirect::to($this->paymentUrl . $paymentToken);
+        return \MbpCoder\Payment\Support\Redirect::to($this->paymentUrl . $paymentToken);
     }
 
     public function payUrl(string|int $paymentToken): string

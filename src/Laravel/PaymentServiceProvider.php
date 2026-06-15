@@ -1,15 +1,15 @@
 <?php
 
-namespace MbpCoder\IranPayment\Laravel;
+namespace MbpCoder\Payment\Laravel;
 
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
-use MbpCoder\IranPayment\Config\Config;
-use MbpCoder\IranPayment\Config\ConfigRepositoryInterface;
-use MbpCoder\IranPayment\PaymentChannelService;
-use MbpCoder\IranPayment\Support\Redirect;
+use MbpCoder\Payment\Config\Config;
+use MbpCoder\Payment\Config\ConfigRepositoryInterface;
+use MbpCoder\Payment\PaymentChannelService;
+use MbpCoder\Payment\Support\Redirect;
 
-class IranPaymentServiceProvider extends ServiceProvider
+class PaymentServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
@@ -22,7 +22,7 @@ class IranPaymentServiceProvider extends ServiceProvider
         Redirect::setHandler(fn (string $url) => redirect()->away($url));
 
         $this->app->bind(PaymentChannelService::class, fn () => new PaymentChannelService());
-        $this->app->alias(PaymentChannelService::class, 'iran-payment');
+        $this->app->alias(PaymentChannelService::class, 'payment');
     }
 
     public function boot(): void
@@ -30,7 +30,7 @@ class IranPaymentServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->publishes([
                 $this->configPath() => $this->app->configPath('channels.php'),
-            ], 'iran-payment-config');
+            ], 'payment-config');
         }
     }
 

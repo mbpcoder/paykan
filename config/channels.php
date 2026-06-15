@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Iran Payment configuration.
+ * Payment configuration.
  *
  * In Laravel this file is published to config/channels.php and read via
  * config('channels.ipg.*'). In Symfony / plain PHP the same array shape is

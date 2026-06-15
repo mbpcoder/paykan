@@ -1,6 +1,6 @@
 <?php
 
-namespace MbpCoder\IranPayment\Config;
+namespace MbpCoder\Payment\Config;
 
 /**
  * A framework-agnostic configuration repository backed by a plain array.

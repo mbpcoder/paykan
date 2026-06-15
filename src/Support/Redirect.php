@@ -1,6 +1,6 @@
 <?php
 
-namespace MbpCoder\IranPayment\Support;
+namespace MbpCoder\Payment\Support;
 
 /**
  * Framework-agnostic redirect helper.

@@ -1,6 +1,6 @@
 <?php
 
-namespace MbpCoder\IranPayment\Config;
+namespace MbpCoder\Payment\Config;
 
 interface ConfigRepositoryInterface
 {

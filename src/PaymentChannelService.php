@@ -1,10 +1,10 @@
 <?php
 
-namespace MbpCoder\IranPayment;
+namespace MbpCoder\Payment;
 
-use MbpCoder\IranPayment\Models\PaymentResponse;
-use MbpCoder\IranPayment\Providers\Idpay;
-use MbpCoder\IranPayment\Support\Str;
+use MbpCoder\Payment\Models\PaymentResponse;
+use MbpCoder\Payment\Providers\Idpay;
+use MbpCoder\Payment\Support\Str;
 
 class PaymentChannelService implements IPaymentChannel
 {
@@ -33,7 +33,7 @@ class PaymentChannelService implements IPaymentChannel
      */
     public function getDefaultChannel(): IPaymentChannel|null
     {
-        return $this->getChannel(\MbpCoder\IranPayment\Config\Config::get('channels.ipg.default'));
+        return $this->getChannel(\MbpCoder\Payment\Config\Config::get('channels.ipg.default'));
     }
 
     /**
@@ -46,7 +46,7 @@ class PaymentChannelService implements IPaymentChannel
         if ($name == 'idpay') {
             return new Idpay();
         }
-        $className = "\\MbpCoder\\IranPayment\\Providers\\" . ucfirst(Str::camel($name));
+        $className = "\\MbpCoder\\Payment\\Providers\\" . ucfirst(Str::camel($name));
         if (class_exists($className)) {
             return new $className($token);
         }

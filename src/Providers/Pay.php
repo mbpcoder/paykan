@@ -1,9 +1,9 @@
 <?php
 
-namespace MbpCoder\IranPayment\Providers;
+namespace MbpCoder\Payment\Providers;
 
-use MbpCoder\IranPayment\IPaymentChannel;
-use MbpCoder\IranPayment\Models\PaymentResponse;
+use MbpCoder\Payment\IPaymentChannel;
+use MbpCoder\Payment\Models\PaymentResponse;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 
@@ -40,14 +40,14 @@ class Pay extends Base implements IPaymentChannel
         $clientConstructorParameters = [];
         parent::__construct();
 
-        $this->token = \MbpCoder\IranPayment\Config\Config::get('channels.ipg.provider.pay.token');
-        $this->sendUrl = \MbpCoder\IranPayment\Config\Config::get('channels.ipg.provider.pay.send_url');
-        $this->paymentUrl = \MbpCoder\IranPayment\Config\Config::get('channels.ipg.provider.pay.payment_url');
-        $this->verifyUrl = \MbpCoder\IranPayment\Config\Config::get('channels.ipg.provider.pay.verify_url');
+        $this->token = \MbpCoder\Payment\Config\Config::get('channels.ipg.provider.pay.token');
+        $this->sendUrl = \MbpCoder\Payment\Config\Config::get('channels.ipg.provider.pay.send_url');
+        $this->paymentUrl = \MbpCoder\Payment\Config\Config::get('channels.ipg.provider.pay.payment_url');
+        $this->verifyUrl = \MbpCoder\Payment\Config\Config::get('channels.ipg.provider.pay.verify_url');
 
         $this->name = "Pay";
 
-        $bindInterface = \MbpCoder\IranPayment\Config\Config::get('channels.ipg.provider.pay.bind_interface');
+        $bindInterface = \MbpCoder\Payment\Config\Config::get('channels.ipg.provider.pay.bind_interface');
         if ($bindInterface) {
             $clientConstructorParameters['curl'] = [
                 CURLOPT_INTERFACE => $bindInterface,
@@ -83,7 +83,7 @@ class Pay extends Base implements IPaymentChannel
      */
     public function pay($paymentToken)
     {
-        return \MbpCoder\IranPayment\Support\Redirect::to($this->paymentUrl . $paymentToken);
+        return \MbpCoder\Payment\Support\Redirect::to($this->paymentUrl . $paymentToken);
     }
 
     public function payUrl(string|int $paymentToken): string

@@ -1,13 +1,13 @@
 <?php
 
-namespace MbpCoder\IranPayment\Symfony\DependencyInjection;
+namespace MbpCoder\Payment\Symfony\DependencyInjection;
 
-use MbpCoder\IranPayment\PaymentChannelService;
+use MbpCoder\Payment\PaymentChannelService;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 
-class IranPaymentExtension extends Extension
+class PaymentExtension extends Extension
 {
     public function load(array $configs, ContainerBuilder $container): void
     {
@@ -16,7 +16,7 @@ class IranPaymentExtension extends Extension
 
         // Store the configuration shaped exactly like the package expects:
         // channels.ipg.{default,callback_url,provider.*}
-        $container->setParameter('iran_payment.config', [
+        $container->setParameter('payment.config', [
             'channels' => [
                 'ipg' => [
                     'default' => $config['default'],
@@ -30,11 +30,11 @@ class IranPaymentExtension extends Extension
         $definition = new Definition(PaymentChannelService::class);
         $definition->setPublic(true);
         $container->setDefinition(PaymentChannelService::class, $definition);
-        $container->setAlias('iran_payment', PaymentChannelService::class)->setPublic(true);
+        $container->setAlias('payment', PaymentChannelService::class)->setPublic(true);
     }
 
     public function getAlias(): string
     {
-        return 'iran_payment';
+        return 'payment';
     }
 }

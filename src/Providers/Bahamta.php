@@ -1,10 +1,10 @@
 <?php
 
-namespace MbpCoder\IranPayment\Providers;
+namespace MbpCoder\Payment\Providers;
 
-use MbpCoder\IranPayment\IPaymentChannel;
-use MbpCoder\IranPayment\Models\PaymentResponse;
-use MbpCoder\IranPayment\Models\PaymentStatus;
+use MbpCoder\Payment\IPaymentChannel;
+use MbpCoder\Payment\Models\PaymentResponse;
+use MbpCoder\Payment\Models\PaymentStatus;
 use GuzzleHttp\Client;
 
 class Bahamta extends Base implements IPaymentChannel
@@ -18,9 +18,9 @@ class Bahamta extends Base implements IPaymentChannel
     {
         parent::__construct();
 
-        $this->token = \MbpCoder\IranPayment\Config\Config::get('channels.ipg.provider.bahamta.token');
-        $this->sendUrl = \MbpCoder\IranPayment\Config\Config::get('channels.ipg.provider.bahamta.send_url');
-        $this->verifyUrl = \MbpCoder\IranPayment\Config\Config::get('channels.ipg.provider.bahamta.verify_url');
+        $this->token = \MbpCoder\Payment\Config\Config::get('channels.ipg.provider.bahamta.token');
+        $this->sendUrl = \MbpCoder\Payment\Config\Config::get('channels.ipg.provider.bahamta.send_url');
+        $this->verifyUrl = \MbpCoder\Payment\Config\Config::get('channels.ipg.provider.bahamta.verify_url');
 
         $this->name = "bahamta";
 
@@ -52,7 +52,7 @@ class Bahamta extends Base implements IPaymentChannel
 
     public function pay(string|int $paymentToken)
     {
-        return \MbpCoder\IranPayment\Support\Redirect::to($paymentToken);
+        return \MbpCoder\Payment\Support\Redirect::to($paymentToken);
     }
 
     public function payUrl(string|int $paymentToken): string

@@ -1,6 +1,6 @@
 <?php
 
-namespace MbpCoder\IranPayment\Providers;
+namespace MbpCoder\Payment\Providers;
 
 abstract class Base
 {
@@ -17,7 +17,7 @@ abstract class Base
     public function __construct()
     {
         //set the default callback url
-        $this->callback = \MbpCoder\IranPayment\Config\Config::get('channels.ipg.callback_url');
+        $this->callback = \MbpCoder\Payment\Config\Config::get('channels.ipg.callback_url');
     }
 
     /**

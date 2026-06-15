@@ -1,6 +1,6 @@
 <?php
 
-namespace MbpCoder\IranPayment\Models;
+namespace MbpCoder\Payment\Models;
 
 enum PaymentStatus: string
 {

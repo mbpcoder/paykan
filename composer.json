@@ -1,8 +1,8 @@
 {
-    "name": "mbpcoder/php-iran-payment",
-    "description": "Framework-agnostic PHP payment package for Iranian payment gateways (Zarinpal, IDPay, Pay.ir, Jibit, Sep, PayPing, Bahamta, PayStar) with Laravel and Symfony integrations.",
+    "name": "mbpcoder/php-payment",
+    "description": "Framework-agnostic PHP payment package for payment gateways (Zarinpal, IDPay, Pay.ir, Jibit, Sep, PayPing, Bahamta, PayStar) with Laravel and Symfony integrations.",
     "type": "library",
-    "keywords": ["payment", "iran", "gateway", "zarinpal", "idpay", "jibit", "laravel", "symfony"],
+    "keywords": ["payment", "gateway", "zarinpal", "idpay", "jibit", "laravel", "symfony"],
     "license": "MIT",
     "require": {
         "php": ">=8.1",
@@ -23,21 +23,21 @@
     },
     "autoload": {
         "psr-4": {
-            "MbpCoder\\IranPayment\\": "src/"
+            "MbpCoder\\Payment\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "MbpCoder\\IranPayment\\Tests\\": "tests/"
+            "MbpCoder\\Payment\\Tests\\": "tests/"
         }
     },
     "extra": {
         "laravel": {
             "providers": [
-                "MbpCoder\\IranPayment\\Laravel\\IranPaymentServiceProvider"
+                "MbpCoder\\Payment\\Laravel\\PaymentServiceProvider"
             ],
             "aliases": {
-                "IranPayment": "MbpCoder\\IranPayment\\Laravel\\IranPaymentFacade"
+                "Payment": "MbpCoder\\Payment\\Laravel\\PaymentFacade"
             }
         }
     },

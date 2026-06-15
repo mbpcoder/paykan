@@ -1,9 +1,9 @@
 <?php
 
-namespace MbpCoder\IranPayment;
+namespace MbpCoder\Payment;
 
 
-use MbpCoder\IranPayment\Models\PaymentResponse;
+use MbpCoder\Payment\Models\PaymentResponse;
 
 interface IPaymentChannel
 {

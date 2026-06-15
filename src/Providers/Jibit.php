@@ -1,11 +1,11 @@
 <?php
 
-namespace MbpCoder\IranPayment\Providers;
+namespace MbpCoder\Payment\Providers;
 
-use MbpCoder\IranPayment\IPaymentChannel;
-use MbpCoder\IranPayment\Models\PaymentResponse;
-use MbpCoder\IranPayment\Models\PaymentStatus;
-use MbpCoder\IranPayment\Support\Http\Http;
+use MbpCoder\Payment\IPaymentChannel;
+use MbpCoder\Payment\Models\PaymentResponse;
+use MbpCoder\Payment\Models\PaymentStatus;
+use MbpCoder\Payment\Support\Http\Http;
 
 class Jibit extends Base implements IPaymentChannel
 {
@@ -50,10 +50,10 @@ class Jibit extends Base implements IPaymentChannel
     {
         parent::__construct();
 
-        $this->token = \MbpCoder\IranPayment\Config\Config::get('channels.ipg.provider.jibit.api_key');
-        $this->secretKey = \MbpCoder\IranPayment\Config\Config::get('channels.ipg.provider.jibit.secret_key');
-        $this->baseUrl = \MbpCoder\IranPayment\Config\Config::get('channels.ipg.provider.jibit.base_url');
-        $this->proxy = \MbpCoder\IranPayment\Config\Config::get('channels.ipg.provider.jibit.proxy');
+        $this->token = \MbpCoder\Payment\Config\Config::get('channels.ipg.provider.jibit.api_key');
+        $this->secretKey = \MbpCoder\Payment\Config\Config::get('channels.ipg.provider.jibit.secret_key');
+        $this->baseUrl = \MbpCoder\Payment\Config\Config::get('channels.ipg.provider.jibit.base_url');
+        $this->proxy = \MbpCoder\Payment\Config\Config::get('channels.ipg.provider.jibit.proxy');
         $this->currency = 'IRR';
 
         $this->name = "Jibit";
@@ -117,7 +117,7 @@ class Jibit extends Base implements IPaymentChannel
 
     public function pay(string|int $paymentToken)
     {
-        return \MbpCoder\IranPayment\Support\Redirect::to($paymentToken);
+        return \MbpCoder\Payment\Support\Redirect::to($paymentToken);
     }
 
     public function payUrl(string|int $paymentToken): string
