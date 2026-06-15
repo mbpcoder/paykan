@@ -47,7 +47,15 @@ class PaymentChannelService implements IPaymentChannel
         if ($name == 'idpay') {
             return new Idpay();
         }
-        $className = "\\MbpCoder\\Payment\\Providers\\" . ucfirst(Str::camel($name));
+        // Acronym-cased classes that don't follow the camelCase convention.
+        $aliases = [
+            'pep' => 'PEP',
+            'pec' => 'PEC',
+            'ecd' => 'ECD',
+            'sadad_bnpl' => 'SadadBNPL',
+        ];
+        $class = $aliases[$name] ?? ucfirst(Str::camel($name));
+        $className = "\\MbpCoder\\Payment\\Providers\\" . $class;
         if (class_exists($className)) {
             return new $className($token);
         }

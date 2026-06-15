@@ -3,13 +3,16 @@
 namespace MbpCoder\Payment\Support\Http;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
+use MbpCoder\Payment\Exceptions\GatewayException;
 
 /**
  * A minimal, fluent HTTP client backed by Guzzle.
  *
  * It mirrors the small subset of Laravel's HTTP client API that the payment
- * providers use (acceptJson, withHeaders, withOptions, withUserAgent, get,
- * post) so the providers can stay framework-agnostic while reading naturally.
+ * providers use (acceptJson, withHeaders, withOptions, withUserAgent, asForm,
+ * timeout, withoutVerifying, get, post) so the providers can stay
+ * framework-agnostic while reading naturally.
  *
  * Any method can be used as an entry point statically, e.g.
  * Http::acceptJson()->post(...), thanks to __callStatic forwarding to a fresh
@@ -19,6 +22,7 @@ class Http
 {
     private array $headers = [];
     private array $options = ['http_errors' => false];
+    private bool $asForm = false;
 
     public static function __callStatic(string $name, array $arguments): mixed
     {
@@ -28,6 +32,13 @@ class Http
     public function acceptJson(): self
     {
         $this->headers['Accept'] = 'application/json';
+        return $this;
+    }
+
+    public function asForm(): self
+    {
+        $this->asForm = true;
+        $this->headers['Content-Type'] = 'application/x-www-form-urlencoded';
         return $this;
     }
 
@@ -43,6 +54,12 @@ class Http
         return $this;
     }
 
+    public function withToken(string $token, string $type = 'Bearer'): self
+    {
+        $this->headers['Authorization'] = trim($type . ' ' . $token);
+        return $this;
+    }
+
     public function withUserAgent(string $userAgent): self
     {
         $this->headers['User-Agent'] = $userAgent;
@@ -52,6 +69,24 @@ class Http
     public function withOptions(array $options): self
     {
         $this->options = array_merge($this->options, $options);
+        return $this;
+    }
+
+    public function timeout(int $seconds): self
+    {
+        $this->options['timeout'] = $seconds;
+        return $this;
+    }
+
+    public function connectTimeout(int $seconds): self
+    {
+        $this->options['connect_timeout'] = $seconds;
+        return $this;
+    }
+
+    public function withoutVerifying(): self
+    {
+        $this->options['verify'] = false;
         return $this;
     }
 
@@ -67,8 +102,15 @@ class Http
     public function post(string $url, array $data = []): Response
     {
         $options = $this->buildOptions();
-        $options['json'] = $data;
+        $options[$this->asForm ? 'form_params' : 'json'] = $data;
         return $this->send('POST', $url, $options);
+    }
+
+    public function put(string $url, array $data = []): Response
+    {
+        $options = $this->buildOptions();
+        $options[$this->asForm ? 'form_params' : 'json'] = $data;
+        return $this->send('PUT', $url, $options);
     }
 
     private function buildOptions(): array
@@ -82,7 +124,11 @@ class Http
 
     private function send(string $method, string $url, array $options): Response
     {
-        $client = new Client();
-        return new Response($client->request($method, $url, $options));
+        try {
+            $client = new Client();
+            return new Response($client->request($method, $url, $options));
+        } catch (GuzzleException $e) {
+            throw new GatewayException($e->getMessage(), (int) $e->getCode(), $e);
+        }
     }
 }

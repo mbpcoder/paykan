@@ -2,11 +2,13 @@
 
 namespace MbpCoder\Payment\Support\Http;
 
+use MbpCoder\Payment\Exceptions\GatewayException;
 use Psr\Http\Message\ResponseInterface;
 
 /**
  * Thin wrapper around a PSR-7 response exposing the small, framework-agnostic
- * surface the payment providers rely on (json(), object(), ok(), status()).
+ * surface the payment providers rely on (json(), object(), ok(), status(),
+ * throw()).
  */
 class Response
 {
@@ -30,6 +32,11 @@ class Response
     public function successful(): bool
     {
         return $this->ok();
+    }
+
+    public function failed(): bool
+    {
+        return ! $this->ok();
     }
 
     public function body(): string
@@ -57,5 +64,16 @@ class Response
     public function object(): mixed
     {
         return json_decode($this->body, false);
+    }
+
+    /**
+     * Throw a GatewayException when the response is not successful.
+     */
+    public function throw(): self
+    {
+        if ($this->failed()) {
+            throw new GatewayException('HTTP request failed with status ' . $this->status() . ': ' . $this->body, $this->status());
+        }
+        return $this;
     }
 }

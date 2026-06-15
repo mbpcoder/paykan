@@ -128,7 +128,22 @@ handler with `MbpCoder\Payment\Support\Redirect::setHandler(...)` if needed.
 
 ## Supported gateways
 
-Zarinpal, IDPay, Pay.ir, Jibit, Sep, PayPing, Bahamta, PayStar.
+Original: Zarinpal, IDPay, Pay.ir, Jibit, Sep, PayPing, Bahamta, PayStar.
+
+Ported from [farayaz/larapay](https://github.com/farayaz/larapay): Vandar, Zibal,
+BehPardakht (Mellat), AsanPardakht, Azkivam, Bitpay, Digipay, ECD, FanavaCard,
+IranDargah, IranKish, IsipaymentSamin, Keepa, MehrIran, NextPay, Omidpay, PEC,
+PEP (Parsian), PardakhtNovin, Polam, RefahBeta, Sadad, SadadBNPL, Sepal,
+Sepehrpay, Shepa, SnappPay, TabaPay, TejaratBajet.
+
+Configure each under `channels.ipg.provider.<name>` (see `config/channels.php`).
+Instantiate via `new PaymentChannelService('<name>')`, e.g. `'vandar'`, `'zibal'`,
+`'beh_pardakht'`, `'pardakht_novin'`.
+
+> Notes: SOAP gateways (BehPardakht, PEC, Sep) require the PHP `ext-soap`
+> extension. A few credit/OTP gateways (e.g. TejaratBajet, PardakhtNovin,
+> SadadBNPL) need callback/OTP data that the generic interface does not carry —
+> see the class docblocks for how those values map onto `verify()`'s arguments.
 
 ## License
 
