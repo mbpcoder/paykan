@@ -15,6 +15,9 @@ class PaymentResponse
 
     // The unique identifier of the transaction
     public string|null $referenceCode = null;
+
+    // Bank-side trace/sequence number, distinct from referenceCode on gateways that report both
+    public string|null $traceNumber = null;
     public string|null $cardNumber = null;
     public string|null $payerIp = null;
     public int|null $amount = null;

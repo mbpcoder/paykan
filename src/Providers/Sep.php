@@ -4,101 +4,149 @@ namespace MbpCoder\Payment\Providers;
 
 use MbpCoder\Payment\Config\Config;
 use MbpCoder\Payment\IPaymentChannel;
+use MbpCoder\Payment\IRefundable;
 use MbpCoder\Payment\Models\PaymentResponse;
-use Exception;
+use MbpCoder\Payment\Models\PaymentStatus;
+use MbpCoder\Payment\Support\FormRedirect;
+use MbpCoder\Payment\Support\Http\Http;
 
-class Sep extends Base implements IPaymentChannel
+/**
+ * Sep (Saman Bank) — REST MobilePG API.
+ *
+ * Verify flow adaptation: $paymentToken carries the RefNum returned on the
+ * callback, $trackingCode carries the original ResNum (order id).
+ */
+class Sep extends Base implements IPaymentChannel, IRefundable
 {
-    private array $codeMap = [
-        '1' => 200,
-        '-1' => 1010, //ارسال api الزامی می باشد
-        '-3' => 1014, //ارسال amount ( مبلغ تراکنش ) الزامی می باشد
-        '-4' => 1015, //amount ( مبلغ تراکنش )باید به صورت عددی باشد
-        '-6' => 1016, //amount نباید کمتر از 1000 باشد
-        '-7' => 1017, //ارسال redirect الزامی می باشد
-        '-8' => 1011, //درگاه پرداختی با api ارسالی یافت نشد و یا غیر فعال می باشد
-        '-9' => 1012, //فروشنده غیر فعال می باشد
-        '-10' => 1013, //تراکنش با خطا مواجه شد
-        '-11' => 1014, //ارسال api الزامی می باشد
-        '-12' => 1015, //ارسال transId الزامی می باشد
-        '-13' => 1016, //درگاه پرداختی با api ارسالی یافت نشد و یا غیر فعال می باشد
-        '-14' => 1017, //فروشنده غیر فعال می باشد
-        '-15' => 1018, //تراکنش با خطا مواجه شده است
-        '-16' => 1019, //تراکنش با خطا مواجه شده است
-        '-17' => 1020, //تراکنش با خطا مواجه شده است
-        '-18' => 1021, //تراکنش با خطا مواجه شده است
+    private string $url = 'https://sep.shaparak.ir';
+
+    private array $statuses = [
+        '-1' => 'api ارسالی نباید خالی باشد.',
+        '-2' => 'merchant غیرفعال است.',
+        '-3' => 'مقدار amount نباید خالی باشد.',
+        '-4' => 'مقدار amount باید به صورت عدد باشد.',
+        '-5' => 'مقدار amount نباید کمتر از 1000 ریال باشد.',
+        '-6' => 'redirect url ارسالی نباید خالی باشد.',
+        '-7' => 'callback url نامعتبر است.',
+        '-8' => 'تراکنش تکراری است.',
+        '-9' => 'خطای داخلی سامانه.',
     ];
 
-    /**
-     * PayPaymentChannel constructor.
-     */
-    public function __construct()
+    public function __construct(string|null $token = null)
     {
-        if (!extension_loaded('soap')) {
-            throw new Exception('soap Extension is not loaded');
-            // Do things
-        }
-
         parent::__construct();
+        $this->name = 'Sep';
+    }
 
-        $this->token = Config::get('channels.ipg.provider.sep.token');
-        $this->sendUrl = Config::get('channels.ipg.provider.sep.send_url');
-        $this->paymentUrl = Config::get('channels.ipg.provider.sep.payment_url');
-        $this->verifyUrl = Config::get('channels.ipg.provider.sep.verify_url');
-        if (Config::get('channels.ipg.provider.sep.callback_url')) {
-            $this->callback = Config::get('channels.ipg.provider.sep.callback_url');
-        }
+    private function cfg(string $key, mixed $default = null): mixed
+    {
+        return Config::get('channels.ipg.provider.sep.' . $key, $default);
+    }
 
-        $this->name = "Sep";
+    private function baseUrl(): string
+    {
+        $base = $this->cfg('base_url');
+
+        return $base !== null ? rtrim($base, '/') : $this->url;
     }
 
     #[\Override]
     public function initial(int $amount, string|int $trackingCode, string|null $description = null): PaymentResponse
     {
-        $client = new \SoapClient($this->sendUrl);
-        $result = null;
         $params = [
-            'MID' => $this->token,
-            'ResNum' => $description,
-            'Amount' => $amount
+            'Action' => 'Token',
+            'Amount' => $amount,
+            'Wage' => '0',
+            'TerminalId' => $this->cfg('terminal_id'),
+            'ResNum' => (string) $trackingCode,
+            'RedirectURL' => $this->callback,
         ];
 
-        $result = $client->__soapCall('RequestToken', $params);
+        $result = $this->request($this->baseUrl() . '/MobilePG/MobilePayment', $params);
+        $status = (int) ($result['Status'] ?? -1);
+        $success = $status === 1;
 
-        return [
-            'status' => $result < 0 ? $this->codeMap[$result] : $this->codeMap['1'],
-            'authority' => strlen((string)$result) > 4 ? $result : null
-        ];
-
+        $paymentResponse = new PaymentResponse();
+        $paymentResponse->originalResponse = $result;
+        $paymentResponse->trackingCode = (string) $trackingCode;
+        $paymentResponse->providerCode = (string) $status;
+        $paymentResponse->providerMessage = $success ? null : $this->translateStatus($status);
+        $paymentResponse->paymentToken = $success ? ($result['Token'] ?? null) : null;
+        $paymentResponse->wage = 0;
+        $paymentResponse->paymentStatus = $success ? PaymentStatus::SUCCESS : PaymentStatus::FAILED;
+        return $paymentResponse;
     }
 
     #[\Override]
-    public function pay($paymentToken)
+    public function pay(string|int $paymentToken)
     {
-        return "<html><body><script>var form=document.createElement('FORM'),token=document.createElement('INPUT'),url=document.createElement('INPUT');token.name='Token';token.value='{$paymentToken}';url.name='RedirectUrl';url.value='{$this->callback}';form.method='POST';form.action='{$this->paymentUrl}';form.appendChild(token);form.appendChild(url);document.body.appendChild(form);form.submit();</script></body></html>";
+        return FormRedirect::render($this->payUrl($paymentToken), [
+            'Token' => $paymentToken,
+        ]);
     }
 
     #[\Override]
     public function payUrl(string|int $paymentToken): string
     {
-        return $paymentToken;
+        return $this->cfg('pay_base_url') ?? ($this->baseUrl() . '/Payment/PaymentController/SendToIPGW');
     }
 
     #[\Override]
     public function verify($paymentToken, $amount, string|null $cardNumber = null, string|int|null $trackingCode = null): PaymentResponse
     {
-        $client = new \SoapClient($this->verifyUrl);
         $params = [
+            'Action' => 'Verify',
             'RefNum' => $paymentToken,
-            'MID' => $this->token
+            'TerminalId' => $this->cfg('terminal_id'),
         ];
 
-        $result = $client->__soapCall('verifyTransaction', $params);
+        $result = $this->request($this->baseUrl() . '/MobilePG/MobilePayment', $params);
+        $status = (int) ($result['Status'] ?? -1);
+        $success = $status > 0;
 
-        return [
-            'status' => $result < 0 ? $this->codeMap[$result] : $this->codeMap['1'],
-            'amount' => $result > 0 ? $result : null
+        $paymentResponse = new PaymentResponse();
+        $paymentResponse->originalResponse = $result;
+        $paymentResponse->paymentToken = (string) $paymentToken;
+        $paymentResponse->cardNumber = $cardNumber;
+        $paymentResponse->trackingCode = $trackingCode !== null ? (string) $trackingCode : null;
+        $paymentResponse->referenceCode = (string) $paymentToken;
+        $paymentResponse->providerCode = (string) $status;
+        $paymentResponse->providerMessage = $success ? null : $this->translateStatus($status);
+        $paymentResponse->wage = 0;
+        $paymentResponse->paymentStatus = $success ? PaymentStatus::SUCCESS : PaymentStatus::FAILED;
+        return $paymentResponse;
+    }
+
+    #[\Override]
+    public function refund(string|int $paymentToken, int $amount, string|int|null $trackingCode = null): bool
+    {
+        $params = [
+            'Action' => 'Reverse',
+            'RefNum' => $paymentToken,
+            'TerminalId' => $this->cfg('terminal_id'),
         ];
+
+        $result = $this->request($this->baseUrl() . '/MobilePG/MobilePayment', $params);
+
+        return (int) ($result['Status'] ?? -1) > 0;
+    }
+
+    #[\Override]
+    public function processCallback(array $params): PaymentResponse
+    {
+        $state = $params['State'] ?? null;
+        $success = $state === 'OK';
+
+        $paymentResponse = new PaymentResponse();
+        $paymentResponse->originalResponse = $params;
+        $paymentResponse->trackingCode = $params['ResNum'] ?? null;
+        $paymentResponse->paymentToken = $params['RefNum'] ?? null;
+        $paymentResponse->referenceCode = $params['RefNum'] ?? null;
+        $paymentResponse->traceNumber = $params['TraceNo'] ?? null;
+        $paymentResponse->cardNumber = $params['SecurePan'] ?? null;
+        $paymentResponse->providerCode = $state;
+        $paymentResponse->paymentStatus = $success ? PaymentStatus::SUCCESS : PaymentStatus::FAILED;
+        return $paymentResponse;
     }
 
     #[\Override]
@@ -107,9 +155,16 @@ class Sep extends Base implements IPaymentChannel
         return $url;
     }
 
-    #[\Override]
-    public function processCallback(array $params): PaymentResponse
+    private function translateStatus(int|string|null $code): string
     {
-        // TODO: Implement processCallback() method.
+        return $this->statuses[(string) $code] ?? ((string) ($code ?? 'failed'));
+    }
+
+    private function request(string $url, array $data): array
+    {
+        return Http::timeout(10)
+            ->post($url, $data)
+            ->throw()
+            ->json();
     }
 }
