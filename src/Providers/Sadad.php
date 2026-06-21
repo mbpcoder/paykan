@@ -21,6 +21,8 @@ class Sadad extends Base implements IPaymentChannel
 {
     private string $url = 'https://sadad.shaparak.ir/vpg/api/v0/';
 
+    private string $payBaseUrl = 'https://sadad.shaparak.ir/VPG/Purchase';
+
     private array $statuses = [];
 
     public function __construct(string|null $token = null)
@@ -47,17 +49,17 @@ class Sadad extends Base implements IPaymentChannel
             'OrderId' => $trackingCode,
         ];
         $result = $this->request('post', 'Request/PaymentRequest', $data);
-        if ($result['ResCode'] != 0) {
-            throw new GatewayException($result['Description']);
-        }
+        $success = ($result['ResCode'] ?? null) == 0;
 
         $paymentResponse = new PaymentResponse();
         $paymentResponse->originalResponse = $result;
         $paymentResponse->trackingCode = (string) $trackingCode;
-        $paymentResponse->paymentToken = $result['Token'];
+        $paymentResponse->providerCode = isset($result['ResCode']) ? (string) $result['ResCode'] : null;
+        $paymentResponse->providerMessage = $success ? null : ($result['Description'] ?? null);
+        $paymentResponse->paymentToken = $success ? ($result['Token'] ?? null) : null;
         $paymentResponse->wage = 0;
-        $paymentResponse->paymentUrl = $this->payUrl($result['Token']);
-        $paymentResponse->paymentStatus = PaymentStatus::SUCCESS;
+        $paymentResponse->paymentUrl = $success ? $this->payUrl($result['Token']) : null;
+        $paymentResponse->paymentStatus = $success ? PaymentStatus::SUCCESS : PaymentStatus::FAILED;
         return $paymentResponse;
     }
 
@@ -70,7 +72,7 @@ class Sadad extends Base implements IPaymentChannel
     #[\Override]
     public function payUrl(string|int $paymentToken): string
     {
-        return 'https://sadad.shaparak.ir/VPG/Purchase?Token=' . $paymentToken;
+        return ($this->cfg('pay_base_url') ?? $this->payBaseUrl) . '?Token=' . $paymentToken;
     }
 
     #[\Override]
@@ -81,9 +83,7 @@ class Sadad extends Base implements IPaymentChannel
             'SignData' => $this->encryptPkcs7((string) $paymentToken),
         ];
         $result = $this->request('post', 'Advice/Verify', $data);
-        if ($result['ResCode'] != 0) {
-            throw new GatewayException($this->translateStatus($result['ResCode']));
-        }
+        $success = ($result['ResCode'] ?? null) == 0;
 
         $paymentResponse = new PaymentResponse();
         $paymentResponse->originalResponse = $result;
@@ -91,8 +91,10 @@ class Sadad extends Base implements IPaymentChannel
         $paymentResponse->cardNumber = $cardNumber;
         $paymentResponse->trackingCode = isset($result['SystemTraceNo']) ? (string) $result['SystemTraceNo'] : null;
         $paymentResponse->referenceCode = isset($result['RetrivalRefNo']) ? (string) $result['RetrivalRefNo'] : null;
+        $paymentResponse->providerCode = isset($result['ResCode']) ? (string) $result['ResCode'] : null;
+        $paymentResponse->providerMessage = $success ? null : $this->translateStatus($result['ResCode'] ?? null);
         $paymentResponse->wage = 0;
-        $paymentResponse->paymentStatus = PaymentStatus::SUCCESS;
+        $paymentResponse->paymentStatus = $success ? PaymentStatus::SUCCESS : PaymentStatus::FAILED;
         return $paymentResponse;
     }
 
@@ -102,8 +104,10 @@ class Sadad extends Base implements IPaymentChannel
         $paymentResponse = new PaymentResponse();
         $paymentResponse->originalResponse = $params;
         $paymentResponse->paymentToken = $params['token'] ?? null;
+        $paymentResponse->traceNumber = $params['token'] ?? null;
         $paymentResponse->trackingCode = isset($params['OrderId']) ? (string) $params['OrderId'] : null;
         $paymentResponse->cardNumber = $params['PrimaryAccNo'] ?? null;
+        $paymentResponse->providerCode = isset($params['ResCode']) ? (string) $params['ResCode'] : null;
         $paymentResponse->paymentStatus = (($params['ResCode'] ?? null) == 0 && isset($params['ResCode']))
             ? PaymentStatus::SUCCESS
             : PaymentStatus::FAILED;
@@ -120,7 +124,7 @@ class Sadad extends Base implements IPaymentChannel
     {
         return Http::timeout(10)
             ->withHeaders($headers)
-            ->{$method}($this->url . $path, $data)
+            ->{$method}(rtrim($this->cfg('base_url') ?? $this->url, '/') . '/' . $path, $data)
             ->throw()
             ->json();
     }

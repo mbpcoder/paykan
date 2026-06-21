@@ -62,11 +62,9 @@ return [
             ],
 
             'sep' => [
-                'token' => env('SEP_TOKEN'),
-                'send_url' => env('SEP_SEND_URL'),
-                'payment_url' => env('SEP_PAYMENT_URL'),
-                'verify_url' => env('SEP_VERIFY_URL'),
-                'callback_url' => env('SEP_CALLBACK_URL'),
+                'terminal_id' => env('SEP_TERMINAL_ID'),
+                'base_url' => env('SEP_BASE_URL'),
+                'pay_base_url' => env('SEP_PAY_BASE_URL'),
             ],
 
             'PayPing' => [
@@ -102,6 +100,7 @@ return [
                 'username' => env('BEHPARDAKHT_USERNAME'),
                 'password' => env('BEHPARDAKHT_PASSWORD'),
                 'is_credit' => env('BEHPARDAKHT_IS_CREDIT', false),
+                'base_url' => env('BEHPARDAKHT_BASE_URL'),
             ],
 
             'asan_pardakht' => [
@@ -207,6 +206,8 @@ return [
                 'terminal_id' => env('SADAD_TERMINAL_ID'),
                 'merchant_id' => env('SADAD_MERCHANT_ID'),
                 'key' => env('SADAD_KEY'),
+                'base_url' => env('SADAD_BASE_URL'),
+                'pay_base_url' => env('SADAD_PAY_BASE_URL'),
             ],
 
             'sadad_bnpl' => [
@@ -221,6 +222,8 @@ return [
 
             'sepehrpay' => [
                 'terminalId' => env('SEPEHRPAY_TERMINAL_ID'),
+                'base_url' => env('SEPEHRPAY_BASE_URL'),
+                'pay_base_url' => env('SEPEHRPAY_PAY_BASE_URL'),
             ],
 
             'shepa' => [

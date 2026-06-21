@@ -5,6 +5,7 @@ namespace MbpCoder\Payment\Providers;
 use MbpCoder\Payment\Config\Config;
 use MbpCoder\Payment\Exceptions\GatewayException;
 use MbpCoder\Payment\IPaymentChannel;
+use MbpCoder\Payment\IRefundable;
 use MbpCoder\Payment\Models\PaymentResponse;
 use MbpCoder\Payment\Models\PaymentStatus;
 use MbpCoder\Payment\Support\FormRedirect;
@@ -18,7 +19,7 @@ use SoapFault;
  * on the callback, $trackingCode carries the original order id, and
  * $cardNumber carries CardHolderPan.
  */
-class BehPardakht extends Base implements IPaymentChannel
+class BehPardakht extends Base implements IPaymentChannel, IRefundable
 {
     private array $statuses = [
         11 => 'شماره کارت نامعتبر است',
@@ -104,15 +105,14 @@ class BehPardakht extends Base implements IPaymentChannel
         }
 
         $result = explode(',', $response->return);
-        if ($result[0] != '0') {
-            throw new GatewayException($this->translateStatus($result[0]));
-        }
 
         $paymentResponse = new PaymentResponse();
         $paymentResponse->originalResponse = $response->return;
         $paymentResponse->trackingCode = (string) $trackingCode;
-        $paymentResponse->paymentToken = $result[1];
-        $paymentResponse->paymentStatus = PaymentStatus::SUCCESS;
+        $paymentResponse->providerCode = $result[0];
+        $paymentResponse->providerMessage = $result[0] != '0' ? $this->translateStatus($result[0]) : null;
+        $paymentResponse->paymentToken = $result[0] == '0' ? ($result[1] ?? null) : null;
+        $paymentResponse->paymentStatus = $result[0] == '0' ? PaymentStatus::SUCCESS : PaymentStatus::FAILED;
         return $paymentResponse;
     }
 
@@ -149,9 +149,7 @@ class BehPardakht extends Base implements IPaymentChannel
             throw new GatewayException($e->getMessage());
         }
 
-        if ($response->return != '0' && $response->return != '45') {
-            throw new GatewayException($this->translateStatus($response->return));
-        }
+        $success = $response->return == '0' || $response->return == '45';
 
         $paymentResponse = new PaymentResponse();
         $paymentResponse->originalResponse = $response->return;
@@ -159,8 +157,33 @@ class BehPardakht extends Base implements IPaymentChannel
         $paymentResponse->cardNumber = $cardNumber;
         $paymentResponse->trackingCode = $trackingCode !== null ? (string) $trackingCode : null;
         $paymentResponse->referenceCode = (string) $paymentToken;
-        $paymentResponse->paymentStatus = PaymentStatus::SUCCESS;
+        $paymentResponse->providerCode = (string) $response->return;
+        $paymentResponse->providerMessage = $success ? null : $this->translateStatus($response->return);
+        $paymentResponse->paymentStatus = $success ? PaymentStatus::SUCCESS : PaymentStatus::FAILED;
         return $paymentResponse;
+    }
+
+    #[\Override]
+    public function refund(string|int $paymentToken, int $amount, string|int|null $trackingCode = null): bool
+    {
+        $data = [
+            'terminalId' => $this->cfg('terminal_id'),
+            'userName' => $this->cfg('username'),
+            'userPassword' => $this->cfg('password'),
+            'orderId' => $trackingCode,
+            'saleOrderId' => $trackingCode,
+            'saleReferenceId' => $paymentToken,
+        ];
+
+        ini_set('default_socket_timeout', '10');
+        try {
+            $client = new SoapClient($this->url('services/pgw?wsdl'));
+            $response = $client->bpReversalRequest($data);
+        } catch (SoapFault $e) {
+            throw new GatewayException($e->getMessage());
+        }
+
+        return $response->return == '0';
     }
 
     #[\Override]
@@ -168,9 +191,12 @@ class BehPardakht extends Base implements IPaymentChannel
     {
         $paymentResponse = new PaymentResponse();
         $paymentResponse->originalResponse = $params;
+        $paymentResponse->trackingCode = $params['SaleOrderId'] ?? null;
         $paymentResponse->paymentToken = $params['SaleReferenceId'] ?? ($params['RefId'] ?? null);
         $paymentResponse->referenceCode = $params['SaleReferenceId'] ?? null;
+        $paymentResponse->traceNumber = $params['SaleReferenceId'] ?? null;
         $paymentResponse->cardNumber = $params['CardHolderPan'] ?? null;
+        $paymentResponse->providerCode = $params['ResCode'] ?? null;
         $paymentResponse->paymentStatus = (($params['ResCode'] ?? null) === '0')
             ? PaymentStatus::SUCCESS
             : PaymentStatus::FAILED;
@@ -185,6 +211,11 @@ class BehPardakht extends Base implements IPaymentChannel
 
     private function url(string $path): string
     {
+        $base = $this->cfg('base_url');
+        if ($base !== null) {
+            return rtrim($base, '/') . '/' . $path;
+        }
+
         $channel = $this->cfg('is_credit') ? 'pgwCreditchannel' : 'pgwchannel';
 
         return 'https://bpm.shaparak.ir/' . $channel . '/' . $path;

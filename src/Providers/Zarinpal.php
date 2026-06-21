@@ -124,7 +124,11 @@ class Zarinpal extends Base implements IPaymentChannel
         $paymentResponse = new PaymentResponse();
         $paymentResponse->originalResponse = $params;
         $paymentResponse->paymentStatus = ($params['Status'] ?? null) === 'OK' ? PaymentStatus::SUCCESS : PaymentStatus::FAILED;
+        $paymentResponse->trackingCode = $params['payment_id'] ?? null;
         $paymentResponse->paymentToken = $params['Authority'] ?? null;
+        $paymentResponse->referenceCode = $params['Authority'] ?? null;
+        $paymentResponse->traceNumber = $params['Authority'] ?? null;
+        $paymentResponse->providerCode = $params['Status'] ?? null;
         return $paymentResponse;
     }
 

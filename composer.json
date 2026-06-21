@@ -20,7 +20,7 @@
     "suggest": {
         "illuminate/support": "Required to use the Laravel integration (service provider & facade).",
         "symfony/http-kernel": "Required to use the Symfony bundle integration.",
-        "ext-soap": "Required for SOAP-based gateways (BehPardakht, PEC, Sep)."
+        "ext-soap": "Required for SOAP-based gateways (BehPardakht, PEC)."
     },
     "autoload": {
         "psr-4": {

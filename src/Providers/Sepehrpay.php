@@ -5,6 +5,7 @@ namespace MbpCoder\Payment\Providers;
 use MbpCoder\Payment\Config\Config;
 use MbpCoder\Payment\Exceptions\GatewayException;
 use MbpCoder\Payment\IPaymentChannel;
+use MbpCoder\Payment\IRefundable;
 use MbpCoder\Payment\Models\PaymentResponse;
 use MbpCoder\Payment\Models\PaymentStatus;
 use MbpCoder\Payment\Support\FormRedirect;
@@ -18,9 +19,11 @@ use MbpCoder\Payment\Support\Http\Http;
  * rrn, tracenumber, ...) are passed via processCallback; verify() takes the
  * digitalreceipt as $paymentToken to call the Advice endpoint.
  */
-class Sepehrpay extends Base implements IPaymentChannel
+class Sepehrpay extends Base implements IPaymentChannel, IRefundable
 {
     private string $url = 'https://sepehr.shaparak.ir:8081/V1/PeymentApi/';
+
+    private string $payBaseUrl = 'https://sepehr.shaparak.ir:8080';
 
     private array $statuses = [
         '-1' => 'تراکنش پیدا نشد.',
@@ -42,10 +45,17 @@ class Sepehrpay extends Base implements IPaymentChannel
         return Config::get('channels.ipg.provider.sepehrpay.' . $key, $default);
     }
 
+    private function baseUrl(): string
+    {
+        $base = $this->cfg('base_url');
+
+        return $base !== null ? rtrim($base, '/') . '/' : $this->url;
+    }
+
     #[\Override]
     public function initial(int $amount, string|int $trackingCode, string|null $description = null): PaymentResponse
     {
-        $url = $this->url . 'GetToken';
+        $url = $this->baseUrl() . 'GetToken';
         $params = [
             'Amount' => $amount,
             'callbackURL' => $this->callback,
@@ -54,16 +64,16 @@ class Sepehrpay extends Base implements IPaymentChannel
         ];
 
         $result = $this->request($url, $params);
-        if ($result['Status'] != 0) {
-            throw new GatewayException($this->translateStatus($result['Status']));
-        }
+        $success = ($result['Status'] ?? null) == 0;
 
         $paymentResponse = new PaymentResponse();
         $paymentResponse->originalResponse = $result;
         $paymentResponse->trackingCode = (string) $trackingCode;
-        $paymentResponse->paymentToken = $result['Accesstoken'];
+        $paymentResponse->providerCode = isset($result['Status']) ? (string) $result['Status'] : null;
+        $paymentResponse->providerMessage = $success ? null : $this->translateStatus($result['Status'] ?? null);
+        $paymentResponse->paymentToken = $success ? ($result['Accesstoken'] ?? null) : null;
         $paymentResponse->wage = $this->fee($amount);
-        $paymentResponse->paymentStatus = PaymentStatus::SUCCESS;
+        $paymentResponse->paymentStatus = $success ? PaymentStatus::SUCCESS : PaymentStatus::FAILED;
         return $paymentResponse;
     }
 
@@ -79,22 +89,19 @@ class Sepehrpay extends Base implements IPaymentChannel
     #[\Override]
     public function payUrl(string|int $paymentToken): string
     {
-        return 'https://sepehr.shaparak.ir:8080';
+        return $this->cfg('pay_base_url') ?? $this->payBaseUrl;
     }
 
     #[\Override]
     public function verify($paymentToken, $amount, string|null $cardNumber = null, string|int|null $trackingCode = null): PaymentResponse
     {
-        $url = $this->url . 'Advice';
+        $url = $this->baseUrl() . 'Advice';
         $data = [
             'Tid' => $this->cfg('terminalId'),
             'digitalreceipt' => $paymentToken,
         ];
         $result = $this->request($url, $data);
-
-        if (! ($result['Status'] == 'Ok' && $result['ReturnId'] == $amount)) {
-            throw new GatewayException($this->translateStatus($result['Status']));
-        }
+        $success = ($result['Status'] ?? null) == 'Ok' && ($result['ReturnId'] ?? null) == $amount;
 
         $paymentResponse = new PaymentResponse();
         $paymentResponse->originalResponse = $result;
@@ -102,9 +109,24 @@ class Sepehrpay extends Base implements IPaymentChannel
         $paymentResponse->cardNumber = $cardNumber;
         $paymentResponse->trackingCode = $trackingCode !== null ? (string) $trackingCode : null;
         $paymentResponse->referenceCode = isset($result['ReturnId']) ? (string) $result['ReturnId'] : null;
+        $paymentResponse->providerCode = isset($result['Status']) ? (string) $result['Status'] : null;
+        $paymentResponse->providerMessage = $success ? null : $this->translateStatus($result['Status'] ?? null);
         $paymentResponse->wage = $this->fee($amount);
-        $paymentResponse->paymentStatus = PaymentStatus::SUCCESS;
+        $paymentResponse->paymentStatus = $success ? PaymentStatus::SUCCESS : PaymentStatus::FAILED;
         return $paymentResponse;
+    }
+
+    #[\Override]
+    public function refund(string|int $paymentToken, int $amount, string|int|null $trackingCode = null): bool
+    {
+        $url = $this->baseUrl() . 'ReverseTransaction';
+        $data = [
+            'Tid' => $this->cfg('terminalId'),
+            'digitalreceipt' => $paymentToken,
+        ];
+        $result = $this->request($url, $data);
+
+        return ($result['Status'] ?? null) == 0;
     }
 
     #[\Override]
@@ -112,10 +134,12 @@ class Sepehrpay extends Base implements IPaymentChannel
     {
         $paymentResponse = new PaymentResponse();
         $paymentResponse->originalResponse = $params;
-        $paymentResponse->paymentToken = $params['digitalreceipt'] ?? ($params['trackId'] ?? null);
+        $paymentResponse->trackingCode = $params['payment_id'] ?? null;
+        $paymentResponse->paymentToken = $params['digitalreceipt'] ?? null;
         $paymentResponse->cardNumber = $params['cardnumber'] ?? null;
-        $paymentResponse->referenceCode = $params['rrn'] ?? null;
-        $paymentResponse->trackingCode = $params['tracenumber'] ?? null;
+        $paymentResponse->referenceCode = $params['digitalreceipt'] ?? null;
+        $paymentResponse->traceNumber = $params['rrn'] ?? null;
+        $paymentResponse->providerCode = $params['respcode'] ?? null;
         $paymentResponse->paymentStatus = (($params['respcode'] ?? null) == 0)
             ? PaymentStatus::SUCCESS
             : PaymentStatus::FAILED;
