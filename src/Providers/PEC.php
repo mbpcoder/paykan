@@ -8,7 +8,7 @@ use MbpCoder\Payment\IPaymentChannel;
 use MbpCoder\Payment\Models\PaymentResponse;
 use MbpCoder\Payment\Models\PaymentStatus;
 use MbpCoder\Payment\Support\Redirect;
-use SoapClient;
+use MbpCoder\Payment\Support\Soap\SoapClientFactory;
 use SoapFault;
 
 /**
@@ -46,7 +46,7 @@ class PEC extends Base implements IPaymentChannel
             ],
         ];
         try {
-            $client = new SoapClient('https://pec.shaparak.ir/NewIPGServices/Sale/SaleService.asmx?WSDL');
+            $client = SoapClientFactory::make('https://pec.shaparak.ir/NewIPGServices/Sale/SaleService.asmx?WSDL');
             $response = $client->SalePaymentRequest($data);
         } catch (SoapFault $e) {
             throw new GatewayException($e->getMessage());
@@ -89,7 +89,7 @@ class PEC extends Base implements IPaymentChannel
             ],
         ];
         try {
-            $client = new SoapClient('https://pec.shaparak.ir/NewIPGServices/Confirm/ConfirmService.asmx?WSDL');
+            $client = SoapClientFactory::make('https://pec.shaparak.ir/NewIPGServices/Confirm/ConfirmService.asmx?WSDL');
             $response = $client->ConfirmPayment($data);
         } catch (SoapFault $e) {
             throw new GatewayException($e->getMessage());
