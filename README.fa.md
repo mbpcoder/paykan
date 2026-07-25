@@ -95,22 +95,11 @@ request/process فعلی اعمال می‌شود؛ اگر می‌خواهید �
 می‌کنید، کافی است یک‌بار تنظیم شود. برای بازگشت به تنظیمات استاتیک از
 `GatewayWeightRegistry::clear('<name>')` یا `::reset()` استفاده کنید.
 
-**در Laravel**، `PaymentServiceProvider` یک facade به نام `PaymentWeights`
-هم ثبت می‌کند (پشت singleton به نام `payment.weights` در کانتینر) تا نیازی
-به نوشتن نام کامل کلاس نباشد:
-
-```php
-use PaymentWeights; // MbpCoder\Payment\Laravel\PaymentWeightsFacade
-
-PaymentWeights::disable('pay');
-PaymentWeights::setWeight('zarinpal', 10);
-PaymentWeights::setWeights(['zarinpal' => 10, 'jibit' => 90]);
-```
-
-این را از هرجایی که برنامه‌تان مقدار enabled/weight را تعیین می‌کند صدا
-بزنید — یک کنترلر ادمین، یک دستور Artisan، یا مرحله‌ی boot در
-`AppServiceProvider::boot()`. این facade فقط یک لایه‌ی syntax روی
-`GatewayWeightRegistry` است؛ هر دو معادل هم هستند.
+این روش در Laravel، Symfony یا PHP ساده یکسان است — چون فقط متدهای static
+هستند، مستقیماً از هرجایی که برنامه‌تان مقدار enabled/weight را تعیین
+می‌کند صدا بزنید (یک کنترلر ادمین، یک دستور Artisan،
+`AppServiceProvider::boot()` و غیره)، بدون نیاز به facade یا binding
+اضافه در کانتینر.
 
 ## درگاه‌های پشتیبانی‌شده
 
