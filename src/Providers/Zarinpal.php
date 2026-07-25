@@ -7,6 +7,7 @@ use MbpCoder\Payment\Config\Config;
 use MbpCoder\Payment\IPaymentChannel;
 use MbpCoder\Payment\Models\PaymentResponse;
 use MbpCoder\Payment\Models\PaymentStatus;
+use MbpCoder\Payment\Support\Http\ClientFactory;
 use GuzzleHttp\Client;
 
 class Zarinpal extends Base implements IPaymentChannel
@@ -52,7 +53,7 @@ class Zarinpal extends Base implements IPaymentChannel
         $this->verifyUrl = Config::get('channels.ipg.provider.zarinpal.verify_url');
 
         $this->name = "Zarinpal";
-        $this->httpClient = new Client([
+        $this->httpClient = ClientFactory::make([
 //            'proxy' => 'socks5h://127.0.0.1:52000',
         ]);
 

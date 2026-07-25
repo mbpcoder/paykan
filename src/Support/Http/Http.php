@@ -2,7 +2,6 @@
 
 namespace MbpCoder\Payment\Support\Http;
 
-use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use MbpCoder\Payment\Exceptions\GatewayException;
 
@@ -125,7 +124,7 @@ class Http
     private function send(string $method, string $url, array $options): Response
     {
         try {
-            $client = new Client();
+            $client = ClientFactory::make();
             return new Response($client->request($method, $url, $options));
         } catch (GuzzleException $e) {
             throw new GatewayException($e->getMessage(), (int) $e->getCode(), $e);

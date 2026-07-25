@@ -7,6 +7,7 @@ use MbpCoder\Payment\Config\Config;
 use MbpCoder\Payment\IPaymentChannel;
 use MbpCoder\Payment\Models\PaymentResponse;
 use MbpCoder\Payment\Models\PaymentStatus;
+use MbpCoder\Payment\Support\Http\ClientFactory;
 use GuzzleHttp\Client;
 
 class Bahamta extends Base implements IPaymentChannel
@@ -29,7 +30,7 @@ class Bahamta extends Base implements IPaymentChannel
         $clientConstructorParameters = [
             'verify' => false,
         ];
-        $this->client = new Client($clientConstructorParameters);
+        $this->client = ClientFactory::make($clientConstructorParameters);
     }
 
     #[\Override]

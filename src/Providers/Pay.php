@@ -6,6 +6,7 @@ use MbpCoder\Payment\Support\Redirect;
 use MbpCoder\Payment\Config\Config;
 use MbpCoder\Payment\IPaymentChannel;
 use MbpCoder\Payment\Models\PaymentResponse;
+use MbpCoder\Payment\Support\Http\ClientFactory;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 
@@ -55,7 +56,7 @@ class Pay extends Base implements IPaymentChannel
                 CURLOPT_INTERFACE => $bindInterface,
             ];
         }
-        $this->client = new Client($clientConstructorParameters);
+        $this->client = ClientFactory::make($clientConstructorParameters);
     }
 
     #[\Override]
