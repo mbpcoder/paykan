@@ -1,5 +1,7 @@
 # PHP Payment
 
+[فارسی](README.fa.md)
+
 A framework-agnostic PHP package for working with payment gateways
 (Zarinpal, IDPay, Pay.ir, Jibit, Sep, PayPing, Bahamta, PayStar) with
 first-class integrations for **Laravel** and **Symfony**, and a plain-PHP
@@ -139,6 +141,59 @@ Sepehrpay, Shepa, SnappPay, TabaPay, TejaratBajet.
 Configure each under `channels.ipg.provider.<name>` (see `config/channels.php`).
 Instantiate via `new PaymentChannelService('<name>')`, e.g. `'vandar'`, `'zibal'`,
 `'beh_pardakht'`, `'pardakht_novin'`.
+
+### Enabled gateways and automatic weighted distribution
+
+Every provider entry has an `enabled` flag and a `weight`:
+
+```php
+'zarinpal' => [
+    'enabled' => env('ZARINPAL_ENABLED', true),
+    'weight' => env('ZARINPAL_WEIGHT', 1),
+    // ...
+],
+```
+
+When you build `new PaymentChannelService()` (or resolve it from the container)
+**without passing a gateway name**, one of the *enabled* gateways is picked
+automatically with a weighted random choice — no gateway name needs to reach
+the manager/service class at all. The chance of a gateway being picked is
+proportional to its weight versus the total weight of all enabled gateways:
+with `zarinpal` weight `10` and `pay` weight `90` (both enabled, total `100`),
+`zarinpal` is selected on ~10% of calls and `pay` on ~90%. This is computed on
+the fly with `random_int()` — no database or stored state involved. Setting
+`enabled` to `false` removes a gateway from the pool entirely; if no gateway
+is enabled, the static `channels.ipg.default` name is used as a fallback.
+
+### Changing enabled/weight at runtime
+
+`MbpCoder\Payment\GatewayWeightRegistry` lets you override `enabled`/`weight`
+at runtime, on top of `config/channels.php`, without touching a database:
+
+```php
+use MbpCoder\Payment\GatewayWeightRegistry;
+
+GatewayWeightRegistry::disable('pay');
+GatewayWeightRegistry::enable('zarinpal');
+GatewayWeightRegistry::setWeight('zarinpal', 10);
+GatewayWeightRegistry::setWeights(['zarinpal' => 10, 'jibit' => 90]); // bulk
+
+// Every subsequent `new PaymentChannelService()` immediately reflects this.
+```
+
+These overrides live only in process memory (a static array) — there is
+still no database or file write involved, it's just a runtime layer over the
+config. On classic PHP-FPM/CLI requests that means the override only applies
+for the current request/process; call it on every boot (from your own admin
+settings, cache, etc.) if you need it to persist across requests, or set it
+once if you're running a long-lived worker (Octane, RoadRunner, Swoole).
+Call `GatewayWeightRegistry::clear('<name>')` or `::reset()` to drop
+overrides and fall back to the static config again.
+
+This works the same way in Laravel, Symfony, or plain PHP — call it directly
+from wherever your app decides the enabled/weight values (an admin
+controller, an Artisan command, `AppServiceProvider::boot()`, etc.); no
+extra facade or container binding is needed since it's just static methods.
 
 > Notes: SOAP gateways (BehPardakht, PEC, Sep) require the PHP `ext-soap`
 > extension. A few credit/OTP gateways (e.g. TejaratBajet, PardakhtNovin,
