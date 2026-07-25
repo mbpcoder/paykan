@@ -46,20 +46,27 @@ class PaymentChannelService implements IPaymentChannel
     }
 
     /**
-     * Returns [name => providerConfig] for every gateway not explicitly disabled.
+     * Returns [name => providerConfig] for every gateway not explicitly
+     * disabled, with GatewayWeightRegistry runtime overrides applied on
+     * top of the static config.
      *
      * @return array<string, array>
      */
     private function getEnabledProviders(): array
     {
         $providers = Config::get('channels.ipg.provider', []) ?? [];
-        return array_filter($providers, fn($config) => ($config['enabled'] ?? true) == true);
+        return array_filter(
+            $providers,
+            fn($config, $name) => GatewayWeightRegistry::isEnabled($name, ($config['enabled'] ?? true) == true),
+            ARRAY_FILTER_USE_BOTH
+        );
     }
 
     /**
      * Weighted-random selection among enabled gateways: a gateway with
      * weight 10 is picked ~10% of the time relative to the total weight
-     * of all enabled gateways. Purely mathematical, no persistence involved.
+     * of all enabled gateways. Purely mathematical, no persistence involved
+     * — see GatewayWeightRegistry for runtime overrides.
      *
      * @return IPaymentChannel|null
      */
@@ -70,7 +77,10 @@ class PaymentChannelService implements IPaymentChannel
             return null;
         }
 
-        $weights = array_map(fn($config) => max(0, (int) ($config['weight'] ?? 1)), $providers);
+        $weights = [];
+        foreach ($providers as $name => $config) {
+            $weights[$name] = max(0, GatewayWeightRegistry::getWeight($name, (int) ($config['weight'] ?? 1)));
+        }
         $totalWeight = array_sum($weights);
 
         if ($totalWeight <= 0) {

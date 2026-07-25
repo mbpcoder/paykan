@@ -165,6 +165,31 @@ the fly with `random_int()` — no database or stored state involved. Setting
 `enabled` to `false` removes a gateway from the pool entirely; if no gateway
 is enabled, the static `channels.ipg.default` name is used as a fallback.
 
+### Changing enabled/weight at runtime
+
+`MbpCoder\Payment\GatewayWeightRegistry` lets you override `enabled`/`weight`
+at runtime, on top of `config/channels.php`, without touching a database:
+
+```php
+use MbpCoder\Payment\GatewayWeightRegistry;
+
+GatewayWeightRegistry::disable('pay');
+GatewayWeightRegistry::enable('zarinpal');
+GatewayWeightRegistry::setWeight('zarinpal', 10);
+GatewayWeightRegistry::setWeights(['zarinpal' => 10, 'jibit' => 90]); // bulk
+
+// Every subsequent `new PaymentChannelService()` immediately reflects this.
+```
+
+These overrides live only in process memory (a static array) — there is
+still no database or file write involved, it's just a runtime layer over the
+config. On classic PHP-FPM/CLI requests that means the override only applies
+for the current request/process; call it on every boot (from your own admin
+settings, cache, etc.) if you need it to persist across requests, or set it
+once if you're running a long-lived worker (Octane, RoadRunner, Swoole).
+Call `GatewayWeightRegistry::clear('<name>')` or `::reset()` to drop
+overrides and fall back to the static config again.
+
 > Notes: SOAP gateways (BehPardakht, PEC, Sep) require the PHP `ext-soap`
 > extension. A few credit/OTP gateways (e.g. TejaratBajet, PardakhtNovin,
 > SadadBNPL) need callback/OTP data that the generic interface does not carry —

@@ -69,6 +69,32 @@ if ($response->isSuccess()) {
 ساخته شود، یک انتخاب تصادفیِ وزن‌دار جدید انجام می‌شود. اگر هیچ درگاهی فعال
 نباشد، به نام استاتیکِ `channels.ipg.default` به‌عنوان fallback بازمی‌گردد.
 
+### تغییر enabled/weight در زمان اجرا (Runtime)
+
+کلاس `MbpCoder\Payment\GatewayWeightRegistry` امکان override کردن
+`enabled`/`weight` را در زمان اجرا، روی تنظیمات `config/channels.php`،
+بدون نیاز به دیتابیس فراهم می‌کند:
+
+```php
+use MbpCoder\Payment\GatewayWeightRegistry;
+
+GatewayWeightRegistry::disable('pay');
+GatewayWeightRegistry::enable('zarinpal');
+GatewayWeightRegistry::setWeight('zarinpal', 10);
+GatewayWeightRegistry::setWeights(['zarinpal' => 10, 'jibit' => 90]); // به‌صورت گروهی
+
+// از همین لحظه، هر `new PaymentChannelService()` جدید این تغییرات را می‌بیند.
+```
+
+این override‌ها فقط در حافظه‌ی پردازش (یک آرایه‌ی static) نگه‌داری می‌شوند —
+هیچ دیتابیس یا نوشتن روی فایلی درکار نیست، صرفاً یک لایه‌ی runtime روی
+تنظیمات است. در PHP-FPM/CLI کلاسیک این یعنی override فقط برای همان
+request/process فعلی اعمال می‌شود؛ اگر می‌خواهید بین request ها هم باقی
+بماند باید آن را در هر boot دوباره تنظیم کنید (مثلاً از تنظیمات ادمین یا
+کش خودتان)، یا اگر روی یک worker پایدار (Octane، RoadRunner، Swoole) اجرا
+می‌کنید، کافی است یک‌بار تنظیم شود. برای بازگشت به تنظیمات استاتیک از
+`GatewayWeightRegistry::clear('<name>')` یا `::reset()` استفاده کنید.
+
 ## درگاه‌های پشتیبانی‌شده
 
 Zarinpal، IDPay، Pay.ir، Jibit، Sep، PayPing، Bahamta، PayStar و بیش از ۲۵
