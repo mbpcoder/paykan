@@ -23,6 +23,9 @@ class PaymentServiceProvider extends ServiceProvider
 
         $this->app->bind(PaymentChannelService::class, fn () => new PaymentChannelService());
         $this->app->alias(PaymentChannelService::class, 'payment');
+
+        $this->app->singleton(GatewayWeightManager::class);
+        $this->app->alias(GatewayWeightManager::class, 'payment.weights');
     }
 
     public function boot(): void

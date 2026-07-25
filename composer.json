@@ -38,7 +38,8 @@
                 "MbpCoder\\Payment\\Laravel\\PaymentServiceProvider"
             ],
             "aliases": {
-                "Payment": "MbpCoder\\Payment\\Laravel\\PaymentFacade"
+                "Payment": "MbpCoder\\Payment\\Laravel\\PaymentFacade",
+                "PaymentWeights": "MbpCoder\\Payment\\Laravel\\PaymentWeightsFacade"
             }
         }
     },

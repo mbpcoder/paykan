@@ -190,6 +190,23 @@ once if you're running a long-lived worker (Octane, RoadRunner, Swoole).
 Call `GatewayWeightRegistry::clear('<name>')` or `::reset()` to drop
 overrides and fall back to the static config again.
 
+**In Laravel**, `PaymentServiceProvider` also registers a `PaymentWeights`
+facade (backed by the container singleton `payment.weights`) so you don't
+need the fully-qualified class name:
+
+```php
+use PaymentWeights; // MbpCoder\Payment\Laravel\PaymentWeightsFacade
+
+PaymentWeights::disable('pay');
+PaymentWeights::setWeight('zarinpal', 10);
+PaymentWeights::setWeights(['zarinpal' => 10, 'jibit' => 90]);
+```
+
+Call this from wherever your app already decides the enabled/weight values —
+an admin controller, an Artisan command, a config-driven boot step in
+`AppServiceProvider::boot()`, etc. The facade is just sugar over
+`GatewayWeightRegistry`; both are equivalent.
+
 > Notes: SOAP gateways (BehPardakht, PEC, Sep) require the PHP `ext-soap`
 > extension. A few credit/OTP gateways (e.g. TejaratBajet, PardakhtNovin,
 > SadadBNPL) need callback/OTP data that the generic interface does not carry —
