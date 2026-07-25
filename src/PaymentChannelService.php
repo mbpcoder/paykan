@@ -30,11 +30,64 @@ class PaymentChannelService implements IPaymentChannel
     }
 
     /**
+     * Picks a channel automatically: a weighted random choice among the
+     * enabled gateways, falling back to the configured static default
+     * when no gateway is enabled/weighted.
+     *
      * @return IPaymentChannel|null
      */
     public function getDefaultChannel(): IPaymentChannel|null
     {
+        $channel = $this->selectWeightedChannel();
+        if ($channel !== null) {
+            return $channel;
+        }
         return $this->getChannel(Config::get('channels.ipg.default'));
+    }
+
+    /**
+     * Returns [name => providerConfig] for every gateway not explicitly disabled.
+     *
+     * @return array<string, array>
+     */
+    private function getEnabledProviders(): array
+    {
+        $providers = Config::get('channels.ipg.provider', []) ?? [];
+        return array_filter($providers, fn($config) => ($config['enabled'] ?? true) == true);
+    }
+
+    /**
+     * Weighted-random selection among enabled gateways: a gateway with
+     * weight 10 is picked ~10% of the time relative to the total weight
+     * of all enabled gateways. Purely mathematical, no persistence involved.
+     *
+     * @return IPaymentChannel|null
+     */
+    private function selectWeightedChannel(): IPaymentChannel|null
+    {
+        $providers = $this->getEnabledProviders();
+        if (empty($providers)) {
+            return null;
+        }
+
+        $weights = array_map(fn($config) => max(0, (int) ($config['weight'] ?? 1)), $providers);
+        $totalWeight = array_sum($weights);
+
+        if ($totalWeight <= 0) {
+            $name = array_rand($providers);
+            return $this->getChannel($name);
+        }
+
+        $random = random_int(1, $totalWeight);
+        $cumulative = 0;
+        foreach ($weights as $name => $weight) {
+            $cumulative += $weight;
+            if ($random <= $cumulative) {
+                return $this->getChannel($name);
+            }
+        }
+
+        return null;
     }
 
     /**

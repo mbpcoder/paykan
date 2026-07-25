@@ -1,5 +1,7 @@
 # PHP Payment
 
+[فارسی](README.fa.md)
+
 A framework-agnostic PHP package for working with payment gateways
 (Zarinpal, IDPay, Pay.ir, Jibit, Sep, PayPing, Bahamta, PayStar) with
 first-class integrations for **Laravel** and **Symfony**, and a plain-PHP
@@ -139,6 +141,29 @@ Sepehrpay, Shepa, SnappPay, TabaPay, TejaratBajet.
 Configure each under `channels.ipg.provider.<name>` (see `config/channels.php`).
 Instantiate via `new PaymentChannelService('<name>')`, e.g. `'vandar'`, `'zibal'`,
 `'beh_pardakht'`, `'pardakht_novin'`.
+
+### Enabled gateways and automatic weighted distribution
+
+Every provider entry has an `enabled` flag and a `weight`:
+
+```php
+'zarinpal' => [
+    'enabled' => env('ZARINPAL_ENABLED', true),
+    'weight' => env('ZARINPAL_WEIGHT', 1),
+    // ...
+],
+```
+
+When you build `new PaymentChannelService()` (or resolve it from the container)
+**without passing a gateway name**, one of the *enabled* gateways is picked
+automatically with a weighted random choice — no gateway name needs to reach
+the manager/service class at all. The chance of a gateway being picked is
+proportional to its weight versus the total weight of all enabled gateways:
+with `zarinpal` weight `10` and `pay` weight `90` (both enabled, total `100`),
+`zarinpal` is selected on ~10% of calls and `pay` on ~90%. This is computed on
+the fly with `random_int()` — no database or stored state involved. Setting
+`enabled` to `false` removes a gateway from the pool entirely; if no gateway
+is enabled, the static `channels.ipg.default` name is used as a fallback.
 
 > Notes: SOAP gateways (BehPardakht, PEC, Sep) require the PHP `ext-soap`
 > extension. A few credit/OTP gateways (e.g. TejaratBajet, PardakhtNovin,
