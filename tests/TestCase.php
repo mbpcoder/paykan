@@ -6,6 +6,7 @@ use GuzzleHttp\Psr7\Response;
 use MbpCoder\Payment\Config\ArrayConfigRepository;
 use MbpCoder\Payment\Config\Config;
 use MbpCoder\Payment\Support\Http\ClientFactory;
+use MbpCoder\Payment\Support\Soap\SoapClientFactory;
 use PHPUnit\Framework\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
@@ -19,6 +20,7 @@ abstract class TestCase extends BaseTestCase
     protected function tearDown(): void
     {
         ClientFactory::reset();
+        SoapClientFactory::reset();
         parent::tearDown();
     }
 
@@ -29,6 +31,15 @@ abstract class TestCase extends BaseTestCase
     protected function fakeHttp(array $responses): void
     {
         ClientFactory::fake($responses);
+    }
+
+    /**
+     * Queue fake SOAP responses (or exceptions) for every SOAP-based
+     * provider (BehPardakht, PEC) for the rest of this test.
+     */
+    protected function fakeSoap(array $responses): void
+    {
+        SoapClientFactory::fake($responses);
     }
 
     protected function jsonResponse(array $body, int $status = 200): Response

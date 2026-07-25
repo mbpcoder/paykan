@@ -9,7 +9,7 @@ use MbpCoder\Payment\IRefundable;
 use MbpCoder\Payment\Models\PaymentResponse;
 use MbpCoder\Payment\Models\PaymentStatus;
 use MbpCoder\Payment\Support\FormRedirect;
-use SoapClient;
+use MbpCoder\Payment\Support\Soap\SoapClientFactory;
 use SoapFault;
 
 /**
@@ -98,7 +98,7 @@ class BehPardakht extends Base implements IPaymentChannel, IRefundable
 
         ini_set('default_socket_timeout', '10');
         try {
-            $client = new SoapClient($this->url('services/pgw?wsdl'));
+            $client = SoapClientFactory::make($this->url('services/pgw?wsdl'));
             $response = $client->{$method}($params);
         } catch (SoapFault $e) {
             throw new GatewayException($e->getMessage());
@@ -142,7 +142,7 @@ class BehPardakht extends Base implements IPaymentChannel, IRefundable
 
         ini_set('default_socket_timeout', '10');
         try {
-            $client = new SoapClient($this->url('services/pgw?wsdl'));
+            $client = SoapClientFactory::make($this->url('services/pgw?wsdl'));
             $client->bpVerifyRequest($data);
             $response = $client->bpSettleRequest($data);
         } catch (SoapFault $e) {
@@ -177,7 +177,7 @@ class BehPardakht extends Base implements IPaymentChannel, IRefundable
 
         ini_set('default_socket_timeout', '10');
         try {
-            $client = new SoapClient($this->url('services/pgw?wsdl'));
+            $client = SoapClientFactory::make($this->url('services/pgw?wsdl'));
             $response = $client->bpReversalRequest($data);
         } catch (SoapFault $e) {
             throw new GatewayException($e->getMessage());
