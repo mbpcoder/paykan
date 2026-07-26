@@ -9,7 +9,7 @@
 ## نصب
 
 ```bash
-composer require mbpcoder/php-payment
+composer require mbpcoder/paykan
 ```
 
 نیازمند PHP نسخه ۸.۴ یا بالاتر.
