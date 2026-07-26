@@ -1,5 +1,5 @@
 {
-    "name": "mbpcoder/php-payment",
+    "name": "mbpcoder/paykan",
     "description": "Framework-agnostic PHP payment package for payment gateways (Zarinpal, IDPay, Pay.ir, Jibit, Sep, PayPing, Bahamta, PayStar) with Laravel and Symfony integrations.",
     "type": "library",
     "keywords": ["payment", "gateway", "zarinpal", "idpay", "jibit", "laravel", "symfony"],

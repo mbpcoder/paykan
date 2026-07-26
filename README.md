@@ -10,7 +10,7 @@ fallback.
 ## Installation
 
 ```bash
-composer require mbpcoder/php-payment
+composer require mbpcoder/paykan
 ```
 
 Requires PHP >= 8.4.
