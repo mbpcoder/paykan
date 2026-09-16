@@ -154,6 +154,16 @@ return [
                 'client_secret' => env('DIGIPAY_CLIENT_SECRET'),
             ],
 
+            'torob_pay' => [
+                'enabled' => env('TOROBPAY_ENABLED', true),
+                'weight' => env('TOROBPAY_WEIGHT', 1),
+                'api_url' => env('TOROBPAY_API_URL', 'https://cpg.torobpay.com'),
+                'client_id' => env('TOROBPAY_CLIENT_ID'),
+                'client_secret' => env('TOROBPAY_CLIENT_SECRET'),
+                'username' => env('TOROBPAY_USERNAME'),
+                'password' => env('TOROBPAY_PASSWORD'),
+            ],
+
             'ecd' => [
                 'enabled' => env('ECD_ENABLED', true),
                 'weight' => env('ECD_WEIGHT', 1),
